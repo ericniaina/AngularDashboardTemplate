@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { lucideLayoutGrid, lucideLogIn } from '@ng-icons/lucide';
+import { lucideLogIn } from '@ng-icons/lucide';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmCardImports } from '@spartan-ng/helm/card';
 import { AuthService } from '../../../core/auth';
@@ -17,7 +17,7 @@ import { ThemeToggleComponent } from '../../../core/layout/theme-toggle.componen
     ThemeToggleComponent,
     TranslocoPipe,
   ],
-  providers: [provideIcons({ lucideLayoutGrid, lucideLogIn })],
+  providers: [provideIcons({ lucideLogIn })],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="bg-muted relative flex min-h-svh items-center justify-center p-4">
@@ -28,11 +28,7 @@ import { ThemeToggleComponent } from '../../../core/layout/theme-toggle.componen
 
       <section hlmCard class="w-full max-w-sm">
         <div hlmCardHeader class="justify-items-center text-center">
-          <span
-            class="bg-primary text-primary-foreground mb-2 flex size-10 items-center justify-center rounded-md"
-          >
-            <ng-icon name="lucideLayoutGrid" class="text-xl" />
-          </span>
+          <img src="logo.svg" alt="" width="80" height="80" class="mb-2 size-20" />
           <h1 hlmCardTitle class="text-xl">{{ 'app.title' | transloco }}</h1>
           <p hlmCardDescription>{{ 'auth.login.description' | transloco }}</p>
         </div>

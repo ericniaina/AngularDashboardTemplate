@@ -4,7 +4,6 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   lucideGlobe,
   lucideLayoutDashboard,
-  lucideLayoutGrid,
   lucideReceiptText,
   lucideUserCog,
   lucideUserPlus,
@@ -36,7 +35,6 @@ import { UserMenuComponent } from '../user-menu/user-menu.component';
     provideIcons({
       lucideGlobe,
       lucideLayoutDashboard,
-      lucideLayoutGrid,
       lucideReceiptText,
       lucideUserCog,
       lucideUserPlus,

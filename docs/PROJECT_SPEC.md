@@ -43,7 +43,7 @@ Demo users on the mock IdP page: **Alice Admin**, **Marc Manager**, **Vera Viewe
 - Click → full navigation to `/bff/login?returnUrl=…` (a redirect-based flow, not an XHR).
 - Mock BFF shows a stand-in IdP page (pick a demo user), then `POST /bff/login/callback` sets the httpOnly session cookie and redirects to the originally-requested deep link. `returnUrl` is validated on both sides (must be a same-origin path) to prevent open redirects.
 - Language switcher and dark-mode toggle are also available on the login page.
-- Layout: a single centered card (`max-w-sm`) on `bg-muted`, with the app logo and name, a one-line description and a full-width primary button. Language and theme controls sit in the top-right corner of the page.
+- Layout: a single centered card (`max-w-sm`) on `bg-muted`, with the 80×80 logo and app name, a one-line description and a full-width primary button. Language and theme controls sit in the top-right corner of the page.
 
 **Session bootstrap**
 - On app init (`app.config.ts` provider / `APP_INITIALIZER`-equivalent using `provideAppInitializer`), call `GET /bff/user`.
@@ -73,13 +73,13 @@ Demo users on the mock IdP page: **Alice Admin**, **Marc Manager**, **Vera Viewe
 - Language switcher (`en` / `fr`), lives in `core/i18n/` (`<app-language-switcher>`): a ghost button showing the current code that opens a dropdown menu. Persisted in `localStorage`.
 - Dark-mode toggle (sun/moon ghost icon button), backed by `ThemeService.isDark` signal.
 - Connected-user menu described above.
-- Topbar: `h-14`, `border-b`, same background as the page, controls right-aligned with `gap-2`. The page title lives in the page header, not the topbar.
+- Topbar: `--app-header-height` (6rem) from `md` up so it lines up with the sidebar's logo row, `h-14` with a small logo on mobile; `border-b`, same background as the page, controls right-aligned with `gap-2`. The page title lives in the page header, not the topbar.
 
 ## 3. Menu (role-based)
 
 - `MenuService` exposes a `computed()` signal: full static menu tree filtered down to items whose `roles` (if any) intersect the current user's roles.
 - The sidebar (spartan Sidebar) renders from that computed signal — no component re-implements the filtering.
-- Sidebar look: header with logo + app name (one line, truncated); one group per menu section, each with a small muted group label; items = Lucide icon + label, `rounded-md`, inset from the sidebar edges, active item = `bg-sidebar-accent` + `font-medium` (see `CLAUDE.md` → "Look & feel"). On desktop, it collapses to an icon rail (labels become tooltips; `Ctrl/Cmd+B` toggles it) and spartan persists the choice in a `sidebar_state` cookie (a UI preference, not session state). Below `md`, it is an off-canvas sheet opened from the topbar toggle, closing on navigation.
+- Sidebar look: header with the 80×80 logo + app name (clamped to two lines), the same height as the topbar (`--app-header-height`, see `CLAUDE.md` → Brand); one group per menu section, each with a small muted group label; items = Lucide icon + label, `rounded-md`, inset from the sidebar edges, active item = `bg-sidebar-accent` + `font-medium` (see `CLAUDE.md` → "Look & feel"). On desktop, it collapses to an icon rail (labels become tooltips; `Ctrl/Cmd+B` toggles it) and spartan persists the choice in a `sidebar_state` cookie (a UI preference, not session state). Below `md`, it is an off-canvas sheet opened from the topbar toggle, closing on navigation.
 - Route guards (`roleGuard`) enforce the same rule at the router level, so a filtered-out menu item is never reachable by typing the URL either — it lands on `/forbidden`.
 
 ## 4. Dashboard (`/dashboard`, first page after login)
@@ -229,5 +229,5 @@ Session state, refresh validity, and all entity data are in-memory only (reset o
 - Whether the dashboard widget layout should be user-rearrangeable (CDK drag-drop) — nice-to-have, not in scope for v1.
 - End-to-end tests: v1 was verified with a throwaway headless-Edge walkthrough (login per role, EN/FR, dark mode, every example page, guards); committing a Playwright suite would lock that in, and it could also capture the look-and-feel check (screenshots in light/dark, en/fr, desktop/mobile).
 - Linting: no ESLint config yet (`ng add angular-eslint`); `prettier-plugin-tailwindcss` would keep class order consistent.
-- Brand: v2 ships spartan's neutral base theme with one primary color. Rebranding = editing the theme variables in `styles.css` (and the logo); nothing else.
+- Brand: themed from the logo colors `#479595` / `#2e6a56` (`CLAUDE.md` → Brand). `public/logo.svg` is a placeholder until the real logo file is dropped in. Rebranding = editing the theme variables in `styles.css` and replacing the logo; nothing else.
 - AG Grid's date *filter* input is the browser's native date field, so its display follows the browser's language, not the app's.

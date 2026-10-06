@@ -4,26 +4,28 @@
     [srOnlySheetTitle]="'layout.navigation' | transloco"
     [srOnlySheetDescription]="'layout.navigationDescription' | transloco"
   >
-    <hlm-sidebar-header>
-      <ul hlmSidebarMenu>
-        <li hlmSidebarMenuItem>
-          <a
-            hlmSidebarMenuButton
-            size="lg"
-            routerLink="/dashboard"
-            [tooltip]="'app.title' | transloco"
-          >
-            <span
-              class="bg-sidebar-primary text-sidebar-primary-foreground flex size-8 shrink-0 items-center justify-center rounded-md"
-            >
-              <ng-icon name="lucideLayoutGrid" />
-            </span>
-            <span class="truncate font-semibold" [title]="'app.title' | transloco">{{
-              'app.title' | transloco
-            }}</span>
-          </a>
-        </li>
-      </ul>
+    <!-- Brand row: 80×80 logo; its height (--app-header-height) is shared with the topbar so both borders line up. -->
+    <hlm-sidebar-header
+      class="h-(--app-header-height) justify-center border-b border-sidebar-border"
+    >
+      <a
+        routerLink="/dashboard"
+        class="ring-sidebar-ring flex min-w-0 items-center gap-3 rounded-md outline-hidden focus-visible:ring-2"
+        [attr.aria-label]="'app.title' | transloco"
+      >
+        <img
+          src="logo.svg"
+          alt=""
+          width="80"
+          height="80"
+          class="size-20 shrink-0 transition-[width,height] duration-200 ease-linear group-data-[collapsible=icon]:size-8"
+        />
+        <span
+          class="line-clamp-2 leading-tight font-semibold group-data-[collapsible=icon]:hidden"
+          [title]="'app.title' | transloco"
+          >{{ 'app.title' | transloco }}</span
+        >
+      </a>
     </hlm-sidebar-header>
 
     <hlm-sidebar-content>
@@ -55,9 +57,11 @@
 
   <main hlmSidebarInset class="min-w-0">
     <header
-      class="bg-background sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 border-b px-4"
+      class="bg-background sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 border-b px-4 md:h-(--app-header-height)"
     >
       <button hlmSidebarTrigger [srOnlyText]="'layout.toggleSidebar' | transloco"></button>
+      <!-- On mobile the sidebar is a sheet, so the brand shows here, compact. -->
+      <img src="logo.svg" alt="" width="80" height="80" class="size-8 md:hidden" />
       <div class="flex-1"></div>
       <app-language-switcher />
       <app-theme-toggle />

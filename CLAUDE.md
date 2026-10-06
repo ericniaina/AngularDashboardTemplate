@@ -139,7 +139,7 @@ The rules the v1 Material build broke (a rounded nav highlight touching the squa
 - **Nothing touches its container edge.** Highlighted and hovered items (nav items, menu items, list rows) sit inset in a padded container (`p-2` group, `gap-1` between items) and are rounded on all four corners. The sidebar's active item = `bg-sidebar-accent text-sidebar-accent-foreground font-medium`, with no left bar and no half-rounded shapes.
 - **One control height.** Inputs, selects, date fields and default buttons share the helm default height (`h-9`); `size="sm"` only in dense toolbars and grid cells. Controls are `w-full` of their layout cell, never sized by content.
 - **Spacing (4 px Tailwind scale only).** Page content `p-4 md:p-6`, max width `max-w-screen-2xl mx-auto`; `gap-6` between page sections and between cards; card padding from the helm card (`p-6`); `gap-4` between form fields; `gap-2` between a label, control, hint and error, and between buttons in a group.
-- **Typography.** One sans font set once as `--font-sans`. Page title `text-2xl font-semibold tracking-tight`, page subtitle `text-sm text-muted-foreground`, card title `text-base font-semibold`, body/UI text `text-sm`, KPI numbers `text-3xl font-semibold tabular-nums`. Long French strings wrap or truncate with a `title`; they never overflow or push layout (e.g. the app title in the sidebar header is one line, truncated).
+- **Typography.** One sans font set once as `--font-sans`. Page title `text-2xl font-semibold tracking-tight`, page subtitle `text-sm text-muted-foreground`, card title `text-base font-semibold`, body/UI text `text-sm`, KPI numbers `text-3xl font-semibold tabular-nums`. Long French strings wrap or truncate with a `title`; they never overflow or push layout (e.g. the app title next to the logo is clamped to two lines).
 - **Forms.**
   - Every control sits in an `hlmField`: label **above** the control, then optional description, then errors. No floating labels, no placeholder used as a label. Required fields show a `*` in the label.
   - Layout is a CSS grid: `grid gap-4` (one column) by default; `sm:grid-cols-2` only to pair short related fields (code + name, first + last name). A field that needs more width spans `sm:col-span-2`. Never place fields side by side with flex and no gap.
@@ -157,6 +157,15 @@ The rules the v1 Material build broke (a rounded nav highlight touching the squa
 - Toggling adds/removes the `dark` class on `<html>` (spartan's convention; Tailwind's `dark:` variant is bound to the same class) and sets `color-scheme` so native controls and scrollbars follow. Because every component reads token variables, that is the entire mechanism. `dark:` utilities should be rare; no component branches on dark/light in TypeScript.
 - Canvas charts need concrete colors: the dashboard reads `--chart-1..5`, `--foreground`, `--muted-foreground`, `--border` and `--card` with `getComputedStyle(document.documentElement)` (`chart-palette.ts`) and recomputes when `ThemeService.isDark` changes. The tokens are `oklch()`, which Chart.js' color helpers can't parse, so each is converted to `rgb()` through a 1×1 canvas.
 - Toggle control lives in the topbar, next to the language switcher (also on the login page).
+
+## Brand
+
+- Logo: `public/logo.svg`, 80×80 (currently a placeholder in the brand colors; replace the file, keeping the name, or update the three `src="logo.svg"` references: shell sidebar header, shell mobile topbar, login card). It is also the favicon.
+- Brand colors: `#479595` (teal) and `#2e6a56` (deep green), mapped onto the theme tokens in `styles.css`, never used directly in components:
+  - light: `--primary` / `--sidebar-primary` = `#2e6a56` (white text on it is 6.3:1); `--ring` and `--chart-1` = `#479595`; `--chart-2` = `#2e6a56`; `--accent` / `--sidebar-accent` are light teal tints; neutrals carry a faint teal tint (hue ~190).
+  - dark: `--primary` is a lightened teal with dark text; charts use lightened versions of both colors.
+  - Don't put white text on `#479595` (3.5:1, fails WCAG AA for body text).
+- Header height: `--app-header-height` (6rem = 80 px logo + 8 px padding) sizes the sidebar's brand row and, from `md` up, the topbar, so both bottom borders line up. Below `md` the topbar is `h-14` with a 32 px logo next to the menu button; the collapsed icon rail shows the logo at 32 px.
 
 ## i18n — built to be removable
 
