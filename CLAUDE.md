@@ -4,7 +4,8 @@ This file governs how code is written in this repo. Read `docs/PROJECT_SPEC.md` 
 
 ## Stack
 
-- Angular, latest stable version (`ng new` / `ng update` should always target latest — do not pin to an old major deliberately).
+- **Runtime: Node 24.13.0** (`.nvmrc`; `engines.node` is `>=24.13.0`). Every package must support it: `.npmrc` sets `engine-strict=true`, so `npm install` refuses any package whose `engines.node` excludes the running Node. Before upgrading a package, check `npm view <pkg>@<version> engines.node`, then install on Node 24.13 and keep the regenerated `package-lock.json`.
+- Angular: the latest version that supports Node 24.13 — currently **Angular 21** (Angular 22 requires Node `^24.15.0`). Its toolchain pins the rest: TypeScript `~5.9` (Angular 21 needs `<6.0`), Vitest `4.x`, jsdom `29.x` (jsdom 30 needs Node 24.15). Don't `ng update` to a major whose `engines` exclude 24.13.
 - Standalone components/directives/pipes only. No NgModules for anything we author (a third-party lib that still ships an NgModule is fine to import).
 - TypeScript strict mode (`strict: true` in tsconfig, keep it on).
 - UI: **Tailwind CSS v4** + **spartan/ui** (shadcn-style components for Angular) on top of the **Angular CDK**. No Angular Material. See "UI components" and "Look & feel" below.

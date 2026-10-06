@@ -2,7 +2,7 @@
 
 This is the feature-by-feature prompt for the project. Conventions/how-to-build are in `CLAUDE.md` at the repo root — read both before implementing anything.
 
-**Status (2026-09-25): v2 implemented** on Angular 22.2, Tailwind CSS 4.3, spartan/ui 1.5 (brain + helm), AG Grid 36.2, ng2-charts 10, Transloco 8.4, Express 5 (mock BFF); verified with the unit suite and a headless-Edge walkthrough (every page, both languages, both themes, mobile, Admin and Viewer). Where implementation refined the plan, this document and `CLAUDE.md` were updated to match the code.
+**Status (2026-10-06): v2 implemented** on Node 24.13.0, Angular 21.2, TypeScript 5.9, Vitest 4, Tailwind CSS 4.3, spartan/ui 1.6 (brain + helm), AG Grid 36.2, ng2-charts 10, Transloco 8.4, Express 5 (mock BFF); verified with the unit suite and a headless-Edge walkthrough (every page, both languages, both themes, mobile, Admin and Viewer). Where implementation refined the plan, this document and `CLAUDE.md` were updated to match the code. (Built first on Angular 22; moved to Angular 21 on 2026-10-06 because Angular 22 requires Node 24.15+ and the project must run on Node 24.13.0.)
 
 **History:** v1 was built on Angular 22.2, Material 22.2, AG Grid 36.2, ng2-charts 10, Transloco 8.4 and Express 5 (mock BFF). Its behavior (auth, roles, grids, i18n, dates, mock BFF) was validated and carries over unchanged. v2 replaces the UI layer: Angular Material is out; Tailwind CSS v4 + spartan/ui + Angular CDK are in, with explicit look-and-feel rules (`CLAUDE.md` → "UI components", "Look & feel").
 

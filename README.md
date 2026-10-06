@@ -2,11 +2,11 @@
 
 A starter for Angular admin dashboards with SSO login through a BFF (backend-for-frontend), role-based access, and worked examples of the screens most dashboards need.
 
-Angular 22 · Tailwind CSS 4 + spartan/ui · AG Grid Community · ng2-charts · Transloco (en/fr) · signals, zoneless · Vitest
+Angular 21 · Tailwind CSS 4 + spartan/ui · AG Grid Community · ng2-charts · Transloco (en/fr) · signals, zoneless · Vitest
 
 ## Quick start
 
-Requires Node 22.22+, 24.15+ or 26+.
+Requires Node 24.13.0 or later (pinned in `.nvmrc`; with NVM for Windows: `nvm install 24.13.0` then `nvm use 24.13.0`). `.npmrc` sets `engine-strict`, so npm refuses any package that does not support the running Node.
 
 ```bash
 npm install     # also installs the mock BFF in ./mock-bff
