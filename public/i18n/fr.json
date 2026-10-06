@@ -1,0 +1,106 @@
+{
+  "app": {
+    "title": "Modèle de tableau de bord"
+  },
+  "menu": {
+    "sections": {
+      "overview": "Vue d'ensemble",
+      "examples": "Exemples",
+      "administration": "Administration"
+    },
+    "dashboard": "Tableau de bord",
+    "countries": "Pays",
+    "employees": "Employés",
+    "onboarding": "Assistant d'intégration",
+    "orderLines": "Lignes de commande",
+    "users": "Utilisateurs"
+  },
+  "layout": {
+    "navigation": "Navigation",
+    "navigationDescription": "Menu principal de l'application.",
+    "toggleSidebar": "Afficher ou masquer le menu",
+    "userMenu": "Menu du compte",
+    "signOut": "Se déconnecter"
+  },
+  "roles": {
+    "Admin": "Administrateur",
+    "Manager": "Responsable",
+    "Viewer": "Lecteur"
+  },
+  "auth": {
+    "login": {
+      "description": "Connectez-vous avec votre compte d'entreprise pour continuer.",
+      "signIn": "Se connecter avec le SSO",
+      "hint": "Développement : le fournisseur d'identité simulé permet de choisir un utilisateur de démonstration."
+    },
+    "forbidden": {
+      "title": "Accès refusé",
+      "message": "Vous n'avez pas l'autorisation d'afficher cette page ou d'effectuer cette action.",
+      "required": "Rôle requis :",
+      "from": "Demandé :",
+      "back": "Retour au tableau de bord"
+    }
+  },
+  "common": {
+    "language": {
+      "label": "Langue",
+      "en": "English",
+      "fr": "Français"
+    },
+    "theme": {
+      "dark": "Passer au thème sombre",
+      "light": "Passer au thème clair"
+    },
+    "table": {
+      "search": "Rechercher dans toutes les colonnes…"
+    },
+    "date": {
+      "placeholder": "jj/mm/aaaa",
+      "openCalendar": "Choisir une date",
+      "clear": "Effacer la date",
+      "storedValue": "Valeur enregistrée :"
+    },
+    "calendar": {
+      "previousMonth": "Mois précédent",
+      "nextMonth": "Mois suivant"
+    },
+    "actions": {
+      "back": "Retour",
+      "cancel": "Annuler",
+      "close": "Fermer",
+      "delete": "Supprimer",
+      "edit": "Modifier",
+      "next": "Suivant",
+      "reset": "Réinitialiser",
+      "retry": "Réessayer",
+      "rowActions": "Actions sur la ligne",
+      "save": "Enregistrer",
+      "submit": "Valider",
+      "view": "Afficher"
+    },
+    "validation": {
+      "required": "Ce champ est obligatoire.",
+      "maxLength": "{{max}} caractères au maximum.",
+      "email": "Saisissez une adresse e-mail valide.",
+      "invalidDate": "Saisissez une date valide."
+    },
+    "errors": {
+      "loadFailed": "Les données n'ont pas pu être chargées.",
+      "tryAgain": "Vérifiez votre connexion et réessayez.",
+      "saveFailed": "Les modifications n'ont pas pu être enregistrées. Réessayez."
+    },
+    "status": {
+      "all": "Tous",
+      "active": "Actif",
+      "inactive": "Inactif"
+    },
+    "regions": {
+      "africa": "Afrique",
+      "americas": "Amériques",
+      "asia": "Asie",
+      "europe": "Europe",
+      "oceania": "Océanie"
+    },
+    "readOnly": "Accès en lecture seule"
+  }
+}

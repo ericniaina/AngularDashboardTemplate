@@ -1,0 +1,72 @@
+<app-page-header [title]="'orders.title' | transloco" [subtitle]="'orders.subtitle' | transloco">
+  <button
+    hlmBtn
+    variant="outline"
+    type="button"
+    [disabled]="!store.dirty() || store.saving()"
+    (click)="discard()"
+  >
+    <ng-icon name="lucideUndo2" />
+    {{ 'orders.actions.discard' | transloco }}
+  </button>
+  <button hlmBtn type="button" [disabled]="!store.canSave()" (click)="save()">
+    @if (store.saving()) {
+      <hlm-spinner class="size-4" />
+    } @else {
+      <ng-icon name="lucideSave" />
+    }
+    {{ 'common.actions.save' | transloco }}
+  </button>
+</app-page-header>
+
+<app-data-table
+  [rowData]="store.loaded() ? rows() : null"
+  [columnDefs]="columnDefs()"
+  [getRowId]="getRowId"
+  [loading]="store.loading()"
+  [pinnedBottomRowData]="store.loaded() ? pinnedTotals() : undefined"
+  [pagination]="false"
+  [options]="gridOptions"
+  height="28rem"
+  (gridReady)="onGridReady($event)"
+  (cellEditRequest)="onCellEditRequest($event)"
+  (selectionChanged)="onSelectionChanged($event)"
+>
+  <ng-container tableActions>
+    <button hlmBtn variant="outline" type="button" [disabled]="store.loading()" (click)="addLine()">
+      <ng-icon name="lucidePlus" />
+      {{ 'orders.actions.add' | transloco }}
+    </button>
+    <button
+      hlmBtn
+      variant="outline"
+      type="button"
+      [disabled]="store.loading() || selectedIds().length === 0"
+      (click)="duplicate()"
+    >
+      <ng-icon name="lucideCopy" />
+      {{ 'orders.actions.duplicate' | transloco: { count: selectedIds().length } }}
+    </button>
+    <button
+      hlmBtn
+      variant="outline"
+      type="button"
+      class="text-destructive"
+      [disabled]="store.loading() || selectedIds().length === 0"
+      (click)="remove()"
+    >
+      <ng-icon name="lucideTrash2" />
+      {{ 'orders.actions.remove' | transloco: { count: selectedIds().length } }}
+    </button>
+  </ng-container>
+
+  @if (store.invalidCount() > 0) {
+    <div
+      role="alert"
+      class="border-destructive/30 bg-destructive/5 text-destructive flex items-center gap-2 rounded-md border px-3 py-2 text-sm"
+    >
+      <ng-icon name="lucideTriangleAlert" />
+      {{ invalidMessage() }}
+    </div>
+  }
+</app-data-table>

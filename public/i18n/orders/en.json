@@ -1,0 +1,26 @@
+{
+  "title": "Order lines",
+  "subtitle": "An editable grid: changes stay local until you save them all at once.",
+  "actions": {
+    "add": "Add line",
+    "duplicate": "Duplicate ({{count}})",
+    "remove": "Remove ({{count}})",
+    "discard": "Discard changes"
+  },
+  "columns": {
+    "product": "Product",
+    "quantity": "Quantity",
+    "unitPrice": "Unit price",
+    "amount": "Amount",
+    "total": "Total"
+  },
+  "messages": {
+    "invalidLines": "{count} line(s) need attention: pick a product, a quantity of at least 1 and a price of 0 or more.",
+    "saved": "Order lines saved.",
+    "saveFailed": "The order lines couldn't be saved.",
+    "leaveTitle": "Leave without saving?",
+    "leaveMessage": "Your changes to the order lines haven't been saved and will be lost.",
+    "leave": "Leave",
+    "stay": "Stay"
+  }
+}

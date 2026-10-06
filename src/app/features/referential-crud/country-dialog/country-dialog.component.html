@@ -1,0 +1,89 @@
+<hlm-dialog-header>
+  <h2 hlmDialogTitle>
+    @if (data.readOnly) {
+      {{ 'countries.dialog.viewTitle' | transloco }}
+    } @else if (data.country) {
+      {{ 'countries.dialog.editTitle' | transloco }}
+    } @else {
+      {{ 'countries.dialog.newTitle' | transloco }}
+    }
+  </h2>
+  <p hlmDialogDescription>{{ 'countries.dialog.description' | transloco }}</p>
+</hlm-dialog-header>
+
+<form id="country-form" class="grid gap-4 sm:grid-cols-3" [formGroup]="form" (ngSubmit)="submit()">
+  <div hlmField>
+    <label hlmFieldLabel for="country-code">{{ 'countries.fields.code' | transloco }} *</label>
+    <input
+      hlmInput
+      id="country-code"
+      formControlName="code"
+      autocomplete="off"
+      class="uppercase"
+      maxlength="3"
+    />
+    <hlm-field-error validator="required">{{
+      'common.validation.required' | transloco
+    }}</hlm-field-error>
+    <hlm-field-error validator="pattern">{{
+      'countries.validation.code' | transloco
+    }}</hlm-field-error>
+    <hlm-field-error validator="unique">{{
+      'countries.validation.duplicate' | transloco
+    }}</hlm-field-error>
+  </div>
+
+  <div hlmField class="sm:col-span-2">
+    <label hlmFieldLabel for="country-name">{{ 'countries.fields.name' | transloco }} *</label>
+    <input hlmInput id="country-name" formControlName="name" autocomplete="off" />
+    <hlm-field-error validator="required">{{
+      'common.validation.required' | transloco
+    }}</hlm-field-error>
+    <hlm-field-error validator="maxlength">
+      {{ 'common.validation.maxLength' | transloco: { max: 60 } }}
+    </hlm-field-error>
+  </div>
+
+  <div hlmField class="sm:col-span-3">
+    <label hlmFieldLabel for="country-region">{{ 'countries.fields.region' | transloco }} *</label>
+    <hlm-select formControlName="region" [itemToString]="regionLabel">
+      <hlm-select-trigger class="w-full" buttonId="country-region">
+        <hlm-select-value [placeholder]="'countries.fields.regionPlaceholder' | transloco" />
+      </hlm-select-trigger>
+      <hlm-select-content *hlmSelectPortal>
+        @for (region of regions; track region) {
+          <hlm-select-item [value]="region">{{ regionText()[region] }}</hlm-select-item>
+        }
+      </hlm-select-content>
+    </hlm-select>
+    <hlm-field-error validator="required">{{
+      'common.validation.required' | transloco
+    }}</hlm-field-error>
+  </div>
+
+  <div hlmField orientation="horizontal" class="sm:col-span-3">
+    <hlm-switch formControlName="active" inputId="country-active" />
+    <div hlmFieldContent>
+      <label hlmFieldLabel for="country-active">{{ 'countries.fields.active' | transloco }}</label>
+      <p hlmFieldDescription>{{ 'countries.fields.activeHint' | transloco }}</p>
+    </div>
+  </div>
+</form>
+
+<hlm-dialog-footer>
+  @if (data.readOnly) {
+    <button hlmBtn variant="outline" type="button" (click)="close()">
+      {{ 'common.actions.close' | transloco }}
+    </button>
+  } @else {
+    <button hlmBtn variant="outline" type="button" (click)="close()">
+      {{ 'common.actions.cancel' | transloco }}
+    </button>
+    <button hlmBtn type="submit" form="country-form" [disabled]="saving()">
+      @if (saving()) {
+        <hlm-spinner class="size-4" />
+      }
+      {{ 'common.actions.save' | transloco }}
+    </button>
+  }
+</hlm-dialog-footer>

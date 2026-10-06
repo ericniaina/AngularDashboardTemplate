@@ -1,0 +1,197 @@
+<app-page-header
+  [title]="'dashboard.title' | transloco"
+  [subtitle]="'dashboard.subtitle' | transloco"
+/>
+
+@if (failed()) {
+  <div hlmEmpty class="border">
+    <div hlmEmptyHeader>
+      <h2 hlmEmptyTitle>{{ 'common.errors.loadFailed' | transloco }}</h2>
+      <p hlmEmptyDescription>{{ 'common.errors.tryAgain' | transloco }}</p>
+    </div>
+    <div hlmEmptyContent>
+      <button hlmBtn variant="outline" type="button" (click)="retry()">
+        {{ 'common.actions.retry' | transloco }}
+      </button>
+    </div>
+  </div>
+} @else {
+  <div class="grid gap-6">
+    <!-- KPI cards -->
+    <div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
+      @for (kpi of kpis(); track kpi.key) {
+        <section hlmCard>
+          <div hlmCardHeader>
+            <h2 hlmCardDescription>{{ 'dashboard.kpis.' + kpi.key | transloco }}</h2>
+            <div hlmCardAction>
+              <ng-icon [name]="kpi.icon" class="text-muted-foreground" />
+            </div>
+          </div>
+          <div hlmCardContent class="flex flex-col gap-1">
+            <p class="text-3xl font-semibold tabular-nums">{{ kpi.formattedValue }}</p>
+            <p class="flex items-center gap-1 text-xs">
+              <span
+                class="flex items-center gap-1 font-medium"
+                [class]="kpi.up ? 'text-success' : 'text-destructive'"
+              >
+                <ng-icon [name]="kpi.up ? 'lucideTrendingUp' : 'lucideTrendingDown'" />
+                {{ kpi.formattedDelta }}
+              </span>
+              <span class="text-muted-foreground">{{
+                'dashboard.kpis.vsPrevious' | transloco
+              }}</span>
+            </p>
+          </div>
+        </section>
+      } @empty {
+        @for (i of [1, 2, 3, 4]; track i) {
+          <section hlmCard>
+            <div hlmCardContent class="flex flex-col gap-3">
+              <div hlmSkeleton class="h-4 w-32"></div>
+              <div hlmSkeleton class="h-8 w-20"></div>
+              <div hlmSkeleton class="h-3 w-40"></div>
+            </div>
+          </section>
+        }
+      }
+    </div>
+
+    <!-- Charts -->
+    <div class="grid gap-6 lg:grid-cols-3">
+      <section hlmCard class="lg:col-span-2">
+        <div hlmCardHeader>
+          <h2 hlmCardTitle>{{ 'dashboard.chart.activityTitle' | transloco }}</h2>
+          <p hlmCardDescription>{{ 'dashboard.chart.activityDescription' | transloco }}</p>
+        </div>
+        <div hlmCardContent>
+          <div class="h-72">
+            @if (lineChart(); as chart) {
+              <canvas
+                baseChart
+                [type]="chart.type"
+                [data]="chart.data"
+                [options]="chart.options"
+              ></canvas>
+            } @else {
+              <div hlmSkeleton class="size-full"></div>
+            }
+          </div>
+        </div>
+      </section>
+
+      <section hlmCard>
+        <div hlmCardHeader>
+          <h2 hlmCardTitle>{{ 'dashboard.chart.regionsTitle' | transloco }}</h2>
+          <p hlmCardDescription>{{ 'dashboard.chart.regionsDescription' | transloco }}</p>
+        </div>
+        <div hlmCardContent>
+          <div class="h-72">
+            @if (donutChart(); as chart) {
+              <canvas
+                baseChart
+                [type]="chart.type"
+                [data]="chart.data"
+                [options]="chart.options"
+              ></canvas>
+            } @else {
+              <div class="flex size-full items-center justify-center">
+                <div hlmSkeleton class="size-48 rounded-full"></div>
+              </div>
+            }
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Recent countries + activity -->
+    <div class="grid gap-6 lg:grid-cols-3">
+      <section hlmCard class="lg:col-span-2">
+        <div hlmCardHeader>
+          <h2 hlmCardTitle>{{ 'dashboard.recentCountries.title' | transloco }}</h2>
+          <p hlmCardDescription>{{ 'dashboard.recentCountries.description' | transloco }}</p>
+          <div hlmCardAction>
+            <a hlmBtn variant="ghost" size="sm" routerLink="/referential">
+              {{ 'dashboard.recentCountries.viewAll' | transloco }}
+              <ng-icon name="lucideArrowRight" />
+            </a>
+          </div>
+        </div>
+        <div hlmCardContent>
+          <app-data-table
+            [rowData]="data() ? recentCountries() : null"
+            [columnDefs]="recentCountryColumns()"
+            [getRowId]="getRecentCountryId"
+            [quickFilter]="false"
+            [pagination]="false"
+            [loading]="!data()"
+          />
+        </div>
+      </section>
+
+      <section hlmCard>
+        <div hlmCardHeader>
+          <h2 hlmCardTitle>{{ 'dashboard.activity.title' | transloco }}</h2>
+        </div>
+        <div hlmCardContent>
+          <ul class="flex flex-col gap-4">
+            @for (item of activity(); track item.at) {
+              <li class="flex items-start gap-3">
+                <span
+                  class="bg-muted text-muted-foreground flex size-8 shrink-0 items-center justify-center rounded-md"
+                >
+                  <ng-icon [name]="item.icon" />
+                </span>
+                <div class="flex min-w-0 flex-col gap-0.5">
+                  <p class="text-sm">
+                    {{
+                      'dashboard.activity.types.' + item.type
+                        | transloco
+                          : {
+                              user: item.user,
+                              entity: ('dashboard.activity.entities.' + item.entity | transloco),
+                              label: item.label,
+                            }
+                    }}
+                  </p>
+                  <p class="text-muted-foreground text-xs">
+                    {{ item.at | localizedDate: 'short' }}
+                  </p>
+                </div>
+              </li>
+            } @empty {
+              @for (i of [1, 2, 3, 4]; track i) {
+                <li class="flex items-center gap-3">
+                  <div hlmSkeleton class="size-8 rounded-md"></div>
+                  <div class="flex flex-1 flex-col gap-2">
+                    <div hlmSkeleton class="h-3 w-4/5"></div>
+                    <div hlmSkeleton class="h-3 w-1/3"></div>
+                  </div>
+                </li>
+              }
+            }
+          </ul>
+        </div>
+      </section>
+    </div>
+
+    <!-- Quick links -->
+    <section hlmCard>
+      <div hlmCardHeader>
+        <h2 hlmCardTitle>{{ 'dashboard.quickLinks.title' | transloco }}</h2>
+        <p hlmCardDescription>{{ 'dashboard.quickLinks.description' | transloco }}</p>
+      </div>
+      <div hlmCardContent class="flex flex-wrap gap-2">
+        @for (link of quickLinks(); track link.route) {
+          <a hlmBtn variant="outline" [routerLink]="link.route">
+            <ng-icon [name]="link.icon" />
+            {{ link.labelKey | transloco }}
+          </a>
+        }
+        <button hlmBtn variant="outline" type="button" (click)="tryForbidden()">
+          <ng-icon name="lucideShieldAlert" />
+          {{ 'dashboard.quickLinks.tryForbidden' | transloco }}
+        </button>
+      </div>
+    </section>
+  </div>
+}

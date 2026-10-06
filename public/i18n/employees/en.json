@@ -1,0 +1,38 @@
+{
+  "title": "Employees",
+  "subtitle": "CRUD with a foreign key (department) and a locale-aware hire date stored as ISO.",
+  "actions": {
+    "new": "New employee"
+  },
+  "columns": {
+    "firstName": "First name",
+    "lastName": "Last name",
+    "email": "Email",
+    "department": "Department",
+    "hireDate": "Hire date"
+  },
+  "dialog": {
+    "newTitle": "New employee",
+    "editTitle": "Edit employee",
+    "description": "The hire date is typed and shown in your language's format, but always stored as yyyy-MM-dd."
+  },
+  "fields": {
+    "firstName": "First name",
+    "lastName": "Last name",
+    "email": "Email",
+    "department": "Department",
+    "departmentPlaceholder": "Select a department",
+    "hireDate": "Hire date"
+  },
+  "validation": {
+    "hireDateFuture": "The hire date can't be in the future."
+  },
+  "messages": {
+    "created": "Employee created.",
+    "updated": "Employee updated.",
+    "deleted": "Employee deleted.",
+    "deleteFailed": "The employee couldn't be deleted.",
+    "deleteTitle": "Delete employee?",
+    "deleteMessage": "{name} will be permanently deleted. This can't be undone."
+  }
+}

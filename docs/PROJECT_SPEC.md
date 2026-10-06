@@ -2,7 +2,9 @@
 
 This is the feature-by-feature prompt for the project. Conventions/how-to-build are in `CLAUDE.md` at the repo root — read both before implementing anything.
 
-**Status (2026-09-25): v2 spec, not yet scaffolded.** v1 was built on Angular 22.2, Material 22.2, AG Grid 36.2, ng2-charts 10, Transloco 8.4 and Express 5 (mock BFF). Its behavior (auth, roles, grids, i18n, dates, mock BFF) was validated and carries over unchanged. v2 replaces the UI layer: Angular Material is out; Tailwind CSS v4 + spartan/ui + Angular CDK are in, with explicit look-and-feel rules (`CLAUDE.md` → "UI components", "Look & feel").
+**Status (2026-09-25): v2 implemented** on Angular 22.2, Tailwind CSS 4.3, spartan/ui 1.5 (brain + helm), AG Grid 36.2, ng2-charts 10, Transloco 8.4, Express 5 (mock BFF); verified with the unit suite and a headless-Edge walkthrough (every page, both languages, both themes, mobile, Admin and Viewer). Where implementation refined the plan, this document and `CLAUDE.md` were updated to match the code.
+
+**History:** v1 was built on Angular 22.2, Material 22.2, AG Grid 36.2, ng2-charts 10, Transloco 8.4 and Express 5 (mock BFF). Its behavior (auth, roles, grids, i18n, dates, mock BFF) was validated and carries over unchanged. v2 replaces the UI layer: Angular Material is out; Tailwind CSS v4 + spartan/ui + Angular CDK are in, with explicit look-and-feel rules (`CLAUDE.md` → "UI components", "Look & feel").
 
 **What changed from v1, and why:** the Material build's forms and navigation looked wrong: the active nav highlight was rounded on one side and square where it met the sidebar edge, dialog fields touched each other with no gutter, a switch sat next to a text field at a different height, and dialogs, buttons and inputs used three unrelated corner radii. v2 fixes this with a shadcn-style component set whose code we own (spartan helm), one token-based theme, and written layout rules. Affected sections: 2 (topbar), 3 (menu), 4 (dashboard), 5–8 (dialogs, selects, stepper, toasts), 9 (dark mode), 11 (dates).
 
@@ -77,7 +79,7 @@ Demo users on the mock IdP page: **Alice Admin**, **Marc Manager**, **Vera Viewe
 
 - `MenuService` exposes a `computed()` signal: full static menu tree filtered down to items whose `roles` (if any) intersect the current user's roles.
 - The sidebar (spartan Sidebar) renders from that computed signal — no component re-implements the filtering.
-- Sidebar look: header with logo + app name (one line, truncated); one group per menu section, each with a small muted group label; items = Lucide icon + label, `rounded-md`, inset from the sidebar edges, active item = `bg-sidebar-accent` + `font-medium` (see `CLAUDE.md` → "Look & feel"). On desktop, it collapses to an icon rail (labels become tooltips) and the choice persists in `localStorage`. Below `md`, it is an off-canvas sheet opened from the topbar toggle, closing on navigation.
+- Sidebar look: header with logo + app name (one line, truncated); one group per menu section, each with a small muted group label; items = Lucide icon + label, `rounded-md`, inset from the sidebar edges, active item = `bg-sidebar-accent` + `font-medium` (see `CLAUDE.md` → "Look & feel"). On desktop, it collapses to an icon rail (labels become tooltips; `Ctrl/Cmd+B` toggles it) and spartan persists the choice in a `sidebar_state` cookie (a UI preference, not session state). Below `md`, it is an off-canvas sheet opened from the topbar toggle, closing on navigation.
 - Route guards (`roleGuard`) enforce the same rule at the router level, so a filtered-out menu item is never reachable by typing the URL either — it lands on `/forbidden`.
 
 ## 4. Dashboard (`/dashboard`, first page after login)
@@ -168,7 +170,7 @@ Suggested entity: **Order Lines** (or invoice lines) — a grid that's fully cli
 Concrete demo: the Employees form/grid's **Hire Date** field (section 6). Two things change with locale, one thing never does:
 
 **Changes with locale:**
-- The `<app-date-field>` calendar (spartan Date Picker): month names, day-of-week labels, first day of week (Monday in `fr`, Sunday in `en`), and the input's displayed format (`4/9/2026` in `en`, `09/04/2026` in `fr`).
+- The `<app-date-field>` (spartan Date Picker: a text input plus a calendar button that opens the calendar): month names, day-of-week labels, first day of week (Monday in `fr`, Sunday in `en`), and the input's displayed format (`4/9/2026` in `en`, `09/04/2026` in `fr`).
 - Typing a date: `09/04/2026` is read as 9 April in `fr` and September 4 in `en` (`parseLocalizedDate`, plugged into the picker's `parseDate` config); ISO input (`2026-04-09`) is accepted in both; an impossible date shows an "Invalid date" error instead of being rolled over.
 - Any other rendered date in the app (grid columns, dashboard timestamps, chart axes, the wizard's review step): formatted via the shared `formatLocalizedDate()` util / `localizedDate` pipe (see `CLAUDE.md` → "Dates"), which takes its locale from `LocaleService` — switching language re-renders every visible date immediately, no reload. Example: hire date `2021-03-15` shows as `Mar 15, 2021` / `15 mars 2021`.
 

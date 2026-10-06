@@ -1,0 +1,96 @@
+<hlm-dialog-header>
+  <h2 hlmDialogTitle>
+    {{ (data.employee ? 'employees.dialog.editTitle' : 'employees.dialog.newTitle') | transloco }}
+  </h2>
+  <p hlmDialogDescription>{{ 'employees.dialog.description' | transloco }}</p>
+</hlm-dialog-header>
+
+<form id="employee-form" class="grid gap-4 sm:grid-cols-2" [formGroup]="form" (ngSubmit)="submit()">
+  <div hlmField>
+    <label hlmFieldLabel for="employee-first-name"
+      >{{ 'employees.fields.firstName' | transloco }} *</label
+    >
+    <input hlmInput id="employee-first-name" formControlName="firstName" autocomplete="off" />
+    <hlm-field-error validator="required">{{
+      'common.validation.required' | transloco
+    }}</hlm-field-error>
+    <hlm-field-error validator="maxlength">{{
+      'common.validation.maxLength' | transloco: { max: 50 }
+    }}</hlm-field-error>
+  </div>
+
+  <div hlmField>
+    <label hlmFieldLabel for="employee-last-name"
+      >{{ 'employees.fields.lastName' | transloco }} *</label
+    >
+    <input hlmInput id="employee-last-name" formControlName="lastName" autocomplete="off" />
+    <hlm-field-error validator="required">{{
+      'common.validation.required' | transloco
+    }}</hlm-field-error>
+    <hlm-field-error validator="maxlength">{{
+      'common.validation.maxLength' | transloco: { max: 50 }
+    }}</hlm-field-error>
+  </div>
+
+  <div hlmField class="sm:col-span-2">
+    <label hlmFieldLabel for="employee-email">{{ 'employees.fields.email' | transloco }} *</label>
+    <input hlmInput id="employee-email" type="email" formControlName="email" autocomplete="off" />
+    <hlm-field-error validator="required">{{
+      'common.validation.required' | transloco
+    }}</hlm-field-error>
+    <hlm-field-error validator="email">{{ 'common.validation.email' | transloco }}</hlm-field-error>
+  </div>
+
+  <div hlmField>
+    <label hlmFieldLabel for="employee-department"
+      >{{ 'employees.fields.department' | transloco }} *</label
+    >
+    <hlm-select formControlName="departmentId" [itemToString]="departmentLabel">
+      <hlm-select-trigger class="w-full" buttonId="employee-department">
+        <hlm-select-value [placeholder]="'employees.fields.departmentPlaceholder' | transloco" />
+      </hlm-select-trigger>
+      <hlm-select-content *hlmSelectPortal>
+        @for (department of departments.departments(); track department.id) {
+          <hlm-select-item [value]="department.id">{{ department.name }}</hlm-select-item>
+        }
+      </hlm-select-content>
+    </hlm-select>
+    <hlm-field-error validator="required">{{
+      'common.validation.required' | transloco
+    }}</hlm-field-error>
+  </div>
+
+  <div hlmField>
+    <label hlmFieldLabel for="employee-hire-date"
+      >{{ 'employees.fields.hireDate' | transloco }} *</label
+    >
+    <app-date-field formControlName="hireDate" inputId="employee-hire-date" [max]="today" />
+    <p hlmFieldDescription>
+      {{ 'common.date.storedValue' | transloco }}
+      <code class="font-mono">{{ storedHireDate() ?? '—' }}</code>
+    </p>
+    @if (!form.controls.hireDate.hasError('invalidDate')) {
+      <hlm-field-error validator="required">{{
+        'common.validation.required' | transloco
+      }}</hlm-field-error>
+    }
+    <hlm-field-error validator="invalidDate">{{
+      'common.validation.invalidDate' | transloco
+    }}</hlm-field-error>
+    <hlm-field-error validator="maxDate">{{
+      'employees.validation.hireDateFuture' | transloco
+    }}</hlm-field-error>
+  </div>
+</form>
+
+<hlm-dialog-footer>
+  <button hlmBtn variant="outline" type="button" (click)="close()">
+    {{ 'common.actions.cancel' | transloco }}
+  </button>
+  <button hlmBtn type="submit" form="employee-form" [disabled]="saving()">
+    @if (saving()) {
+      <hlm-spinner class="size-4" />
+    }
+    {{ 'common.actions.save' | transloco }}
+  </button>
+</hlm-dialog-footer>

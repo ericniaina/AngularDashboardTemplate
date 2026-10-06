@@ -1,0 +1,9 @@
+{
+  "title": "Users",
+  "subtitle": "Demo accounts known to the identity provider (Admin only).",
+  "columns": {
+    "name": "Name",
+    "email": "Email",
+    "roles": "Roles"
+  }
+}

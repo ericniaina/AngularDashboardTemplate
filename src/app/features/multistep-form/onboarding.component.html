@@ -1,0 +1,252 @@
+<app-page-header
+  [title]="'onboarding.title' | transloco"
+  [subtitle]="'onboarding.subtitle' | transloco"
+/>
+
+@if (done()) {
+  <section hlmCard class="mx-auto max-w-xl">
+    <div hlmCardContent class="flex flex-col items-center gap-4 py-6 text-center">
+      <span class="bg-muted flex size-12 items-center justify-center rounded-full">
+        <ng-icon name="lucideCircleCheck" class="text-success text-2xl" />
+      </span>
+      <div class="flex flex-col gap-1">
+        <h2 class="text-lg font-semibold">{{ 'onboarding.done.title' | transloco }}</h2>
+        <p class="text-muted-foreground text-sm">{{ 'onboarding.done.message' | transloco }}</p>
+      </div>
+      <div class="flex flex-wrap justify-center gap-2">
+        <button hlmBtn variant="outline" type="button" (click)="startAnother()">
+          {{ 'onboarding.done.startAnother' | transloco }}
+        </button>
+        <a hlmBtn routerLink="/dashboard">{{ 'onboarding.done.backToDashboard' | transloco }}</a>
+      </div>
+    </div>
+  </section>
+} @else {
+  <section hlmCard class="mx-auto max-w-4xl" [formGroup]="form">
+    <div hlmCardContent>
+      <app-stepper #stepper [linear]="true" [orientation]="narrow() ? 'vertical' : 'horizontal'">
+        <!-- 1. Personal info -->
+        <cdk-step [stepControl]="form.controls.personal" [label]="stepLabels().personal">
+          <div class="grid gap-4 sm:grid-cols-2" formGroupName="personal">
+            <div hlmField>
+              <label hlmFieldLabel for="ob-first-name"
+                >{{ 'onboarding.fields.firstName' | transloco }} *</label
+              >
+              <input hlmInput id="ob-first-name" formControlName="firstName" autocomplete="off" />
+              <hlm-field-error validator="required">{{
+                'common.validation.required' | transloco
+              }}</hlm-field-error>
+            </div>
+            <div hlmField>
+              <label hlmFieldLabel for="ob-last-name"
+                >{{ 'onboarding.fields.lastName' | transloco }} *</label
+              >
+              <input hlmInput id="ob-last-name" formControlName="lastName" autocomplete="off" />
+              <hlm-field-error validator="required">{{
+                'common.validation.required' | transloco
+              }}</hlm-field-error>
+            </div>
+            <div hlmField>
+              <label hlmFieldLabel for="ob-email"
+                >{{ 'onboarding.fields.email' | transloco }} *</label
+              >
+              <input
+                hlmInput
+                id="ob-email"
+                type="email"
+                formControlName="email"
+                autocomplete="off"
+              />
+              <hlm-field-error validator="required">{{
+                'common.validation.required' | transloco
+              }}</hlm-field-error>
+              <hlm-field-error validator="email">{{
+                'common.validation.email' | transloco
+              }}</hlm-field-error>
+            </div>
+            <div hlmField>
+              <label hlmFieldLabel for="ob-birth-date"
+                >{{ 'onboarding.fields.birthDate' | transloco }} *</label
+              >
+              <app-date-field formControlName="birthDate" inputId="ob-birth-date" [max]="today" />
+              @if (!form.controls.personal.controls.birthDate.hasError('invalidDate')) {
+                <hlm-field-error validator="required">{{
+                  'common.validation.required' | transloco
+                }}</hlm-field-error>
+              }
+              <hlm-field-error validator="invalidDate">{{
+                'common.validation.invalidDate' | transloco
+              }}</hlm-field-error>
+              <hlm-field-error validator="maxDate">{{
+                'onboarding.validation.birthDateFuture' | transloco
+              }}</hlm-field-error>
+            </div>
+          </div>
+        </cdk-step>
+
+        <!-- 2. Role & department -->
+        <cdk-step [stepControl]="form.controls.job" [label]="stepLabels().job">
+          <div class="grid gap-4 sm:grid-cols-2" formGroupName="job">
+            <div hlmField>
+              <label hlmFieldLabel for="ob-department"
+                >{{ 'onboarding.fields.department' | transloco }} *</label
+              >
+              <hlm-select formControlName="departmentId" [itemToString]="departmentLabel">
+                <hlm-select-trigger class="w-full" buttonId="ob-department">
+                  <hlm-select-value
+                    [placeholder]="'onboarding.fields.departmentPlaceholder' | transloco"
+                  />
+                </hlm-select-trigger>
+                <hlm-select-content *hlmSelectPortal>
+                  @for (department of departments.departments(); track department.id) {
+                    <hlm-select-item [value]="department.id">{{ department.name }}</hlm-select-item>
+                  }
+                </hlm-select-content>
+              </hlm-select>
+              <hlm-field-error validator="required">{{
+                'common.validation.required' | transloco
+              }}</hlm-field-error>
+            </div>
+            <div hlmField>
+              <label hlmFieldLabel for="ob-job-title"
+                >{{ 'onboarding.fields.jobTitle' | transloco }} *</label
+              >
+              <input hlmInput id="ob-job-title" formControlName="jobTitle" autocomplete="off" />
+              <hlm-field-error validator="required">{{
+                'common.validation.required' | transloco
+              }}</hlm-field-error>
+            </div>
+            <div hlmField>
+              <label hlmFieldLabel for="ob-start-date"
+                >{{ 'onboarding.fields.startDate' | transloco }} *</label
+              >
+              <app-date-field formControlName="startDate" inputId="ob-start-date" />
+              @if (!form.controls.job.controls.startDate.hasError('invalidDate')) {
+                <hlm-field-error validator="required">{{
+                  'common.validation.required' | transloco
+                }}</hlm-field-error>
+              }
+              <hlm-field-error validator="invalidDate">{{
+                'common.validation.invalidDate' | transloco
+              }}</hlm-field-error>
+            </div>
+          </div>
+        </cdk-step>
+
+        <!-- 3. Access -->
+        <cdk-step [stepControl]="form.controls.access" [label]="stepLabels().access">
+          <fieldset hlmFieldSet formGroupName="access">
+            <legend hlmFieldLegend>{{ 'onboarding.access.legend' | transloco }}</legend>
+            <p hlmFieldDescription>{{ 'onboarding.access.description' | transloco }}</p>
+            <div hlmFieldGroup class="gap-4">
+              @for (role of roles; track role) {
+                <div hlmField orientation="horizontal">
+                  <hlm-checkbox [formControlName]="role" [inputId]="'ob-role-' + role" />
+                  <div hlmFieldContent>
+                    <label hlmFieldLabel [for]="'ob-role-' + role">{{
+                      'roles.' + role | transloco
+                    }}</label>
+                    <p hlmFieldDescription>{{ 'onboarding.access.roles.' + role | transloco }}</p>
+                  </div>
+                </div>
+              }
+            </div>
+            @if (accessAttempted() && form.controls.access.hasError('atLeastOneChecked')) {
+              <p class="text-destructive text-sm" role="alert">
+                {{ 'onboarding.validation.atLeastOneRole' | transloco }}
+              </p>
+            }
+          </fieldset>
+        </cdk-step>
+
+        <!-- 4. Review -->
+        <cdk-step [label]="stepLabels().review">
+          <div class="grid gap-6 sm:grid-cols-2">
+            <dl class="flex flex-col gap-3 text-sm">
+              <div>
+                <dt class="text-muted-foreground">{{ 'onboarding.fields.name' | transloco }}</dt>
+                <dd class="font-medium">
+                  {{ value().personal.firstName }} {{ value().personal.lastName }}
+                </dd>
+              </div>
+              <div>
+                <dt class="text-muted-foreground">{{ 'onboarding.fields.email' | transloco }}</dt>
+                <dd class="font-medium">{{ value().personal.email }}</dd>
+              </div>
+              <div>
+                <dt class="text-muted-foreground">
+                  {{ 'onboarding.fields.birthDate' | transloco }}
+                </dt>
+                <dd class="font-medium">
+                  {{ value().personal.birthDate | localizedDate: 'longDate' }}
+                  <span class="text-muted-foreground font-normal">
+                    · {{ 'onboarding.review.sentAs' | transloco }}
+                    <code class="font-mono">{{ value().personal.birthDate }}</code>
+                  </span>
+                </dd>
+              </div>
+            </dl>
+            <dl class="flex flex-col gap-3 text-sm">
+              <div>
+                <dt class="text-muted-foreground">
+                  {{ 'onboarding.fields.department' | transloco }}
+                </dt>
+                <dd class="font-medium">{{ departmentLabel(value().job.departmentId) }}</dd>
+              </div>
+              <div>
+                <dt class="text-muted-foreground">
+                  {{ 'onboarding.fields.jobTitle' | transloco }}
+                </dt>
+                <dd class="font-medium">{{ value().job.jobTitle }}</dd>
+              </div>
+              <div>
+                <dt class="text-muted-foreground">
+                  {{ 'onboarding.fields.startDate' | transloco }}
+                </dt>
+                <dd class="font-medium">
+                  {{ value().job.startDate | localizedDate: 'longDate' }}
+                  <span class="text-muted-foreground font-normal">
+                    · {{ 'onboarding.review.sentAs' | transloco }}
+                    <code class="font-mono">{{ value().job.startDate }}</code>
+                  </span>
+                </dd>
+              </div>
+              <div>
+                <dt class="text-muted-foreground">{{ 'onboarding.steps.access' | transloco }}</dt>
+                <dd class="font-medium">
+                  @for (role of selectedRoles(); track role; let last = $last) {
+                    {{ 'roles.' + role | transloco }}{{ last ? '' : ', ' }}
+                  }
+                </dd>
+              </div>
+            </dl>
+          </div>
+        </cdk-step>
+      </app-stepper>
+    </div>
+
+    <div hlmCardFooter class="justify-between border-t">
+      <button
+        hlmBtn
+        variant="outline"
+        type="button"
+        [disabled]="stepper.selectedIndex === 0"
+        (click)="previous()"
+      >
+        {{ 'common.actions.back' | transloco }}
+      </button>
+      @if (stepper.selectedIndex === stepper.steps.length - 1) {
+        <button hlmBtn type="button" [disabled]="submitting() || form.invalid" (click)="submit()">
+          @if (submitting()) {
+            <hlm-spinner class="size-4" />
+          }
+          {{ 'common.actions.submit' | transloco }}
+        </button>
+      } @else {
+        <button hlmBtn type="button" (click)="next()">
+          {{ 'common.actions.next' | transloco }}
+        </button>
+      }
+    </div>
+  </section>
+}

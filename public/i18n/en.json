@@ -1,0 +1,106 @@
+{
+  "app": {
+    "title": "Dashboard Template"
+  },
+  "menu": {
+    "sections": {
+      "overview": "Overview",
+      "examples": "Examples",
+      "administration": "Administration"
+    },
+    "dashboard": "Dashboard",
+    "countries": "Countries",
+    "employees": "Employees",
+    "onboarding": "Onboarding wizard",
+    "orderLines": "Order lines",
+    "users": "Users"
+  },
+  "layout": {
+    "navigation": "Navigation",
+    "navigationDescription": "Main menu of the application.",
+    "toggleSidebar": "Toggle sidebar",
+    "userMenu": "Account menu",
+    "signOut": "Sign out"
+  },
+  "roles": {
+    "Admin": "Admin",
+    "Manager": "Manager",
+    "Viewer": "Viewer"
+  },
+  "auth": {
+    "login": {
+      "description": "Sign in with your company account to continue.",
+      "signIn": "Sign in with SSO",
+      "hint": "Development: the mock identity provider lets you pick a demo user."
+    },
+    "forbidden": {
+      "title": "Access denied",
+      "message": "You don't have permission to view this page or perform this action.",
+      "required": "Required role:",
+      "from": "Requested:",
+      "back": "Back to dashboard"
+    }
+  },
+  "common": {
+    "language": {
+      "label": "Language",
+      "en": "English",
+      "fr": "Français"
+    },
+    "theme": {
+      "dark": "Switch to dark theme",
+      "light": "Switch to light theme"
+    },
+    "table": {
+      "search": "Search all columns…"
+    },
+    "date": {
+      "placeholder": "mm/dd/yyyy",
+      "openCalendar": "Choose date",
+      "clear": "Clear date",
+      "storedValue": "Stored value:"
+    },
+    "calendar": {
+      "previousMonth": "Go to the previous month",
+      "nextMonth": "Go to the next month"
+    },
+    "actions": {
+      "back": "Back",
+      "cancel": "Cancel",
+      "close": "Close",
+      "delete": "Delete",
+      "edit": "Edit",
+      "next": "Next",
+      "reset": "Reset",
+      "retry": "Retry",
+      "rowActions": "Row actions",
+      "save": "Save",
+      "submit": "Submit",
+      "view": "View"
+    },
+    "validation": {
+      "required": "This field is required.",
+      "maxLength": "At most {{max}} characters.",
+      "email": "Enter a valid email address.",
+      "invalidDate": "Enter a valid date."
+    },
+    "errors": {
+      "loadFailed": "The data couldn't be loaded.",
+      "tryAgain": "Check your connection and try again.",
+      "saveFailed": "The changes couldn't be saved. Please try again."
+    },
+    "status": {
+      "all": "All",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "regions": {
+      "africa": "Africa",
+      "americas": "Americas",
+      "asia": "Asia",
+      "europe": "Europe",
+      "oceania": "Oceania"
+    },
+    "readOnly": "Read-only access"
+  }
+}

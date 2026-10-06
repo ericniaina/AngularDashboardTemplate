@@ -1,0 +1,49 @@
+{
+  "title": "Tableau de bord",
+  "subtitle": "L'activité et les chiffres clés en un coup d'œil.",
+  "kpis": {
+    "referentialItems": "Éléments du référentiel",
+    "openOrderLines": "Lignes de commande ouvertes",
+    "activeUsers": "Utilisateurs actifs",
+    "pendingApprovals": "Validations en attente",
+    "vsPrevious": "vs période précédente"
+  },
+  "chart": {
+    "activityTitle": "Activité",
+    "activityDescription": "Connexions et modifications des 30 derniers jours.",
+    "regionsTitle": "Pays par région",
+    "regionsDescription": "Pays du référentiel par région.",
+    "signIns": "Connexions",
+    "changes": "Modifications"
+  },
+  "recentCountries": {
+    "title": "Pays récemment modifiés",
+    "description": "Les cinq dernières modifications du référentiel.",
+    "viewAll": "Tout afficher",
+    "columns": {
+      "code": "Code",
+      "name": "Nom",
+      "region": "Région",
+      "updatedAt": "Modifié le"
+    }
+  },
+  "activity": {
+    "title": "Activité récente",
+    "types": {
+      "create": "{{user}} a créé {{entity}} « {{label}} »",
+      "update": "{{user}} a modifié {{entity}} « {{label}} »",
+      "delete": "{{user}} a supprimé {{entity}} « {{label}} »",
+      "save": "{{user}} a enregistré {{label}} {{entity}}"
+    },
+    "entities": {
+      "country": "le pays",
+      "employee": "l'employé",
+      "orderLines": "lignes de commande"
+    }
+  },
+  "quickLinks": {
+    "title": "Accès rapides",
+    "description": "Raccourcis vers les pages accessibles à votre rôle.",
+    "tryForbidden": "Tester un appel d'API interdit (403)"
+  }
+}

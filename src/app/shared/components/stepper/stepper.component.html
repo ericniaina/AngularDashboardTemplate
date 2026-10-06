@@ -1,0 +1,60 @@
+@if (orientation === 'horizontal') {
+  <ol class="flex items-center gap-2" role="tablist" aria-orientation="horizontal">
+    @for (step of steps; track step; let i = $index, last = $last) {
+      <li class="flex min-w-0 items-center gap-2" [class.flex-1]="!last">
+        <ng-container *ngTemplateOutlet="header; context: { $implicit: step, index: i }" />
+        @if (!last) {
+          <div
+            class="h-px min-w-4 flex-1"
+            [class]="step.completed ? 'bg-primary' : 'bg-border'"
+          ></div>
+        }
+      </li>
+    }
+  </ol>
+  <div class="mt-6" role="tabpanel" [attr.aria-labelledby]="_getStepLabelId(selectedIndex)">
+    <ng-container [ngTemplateOutlet]="selected?.content ?? null" />
+  </div>
+} @else {
+  <ol class="flex flex-col gap-2" role="tablist" aria-orientation="vertical">
+    @for (step of steps; track step; let i = $index, last = $last) {
+      <li class="flex flex-col gap-2">
+        <ng-container *ngTemplateOutlet="header; context: { $implicit: step, index: i }" />
+        <div class="ms-4 border-s ps-6" [class.pb-2]="!last" [class.border-transparent]="last">
+          @if (i === selectedIndex) {
+            <div class="pt-2 pb-4" role="tabpanel" [attr.aria-labelledby]="_getStepLabelId(i)">
+              <ng-container [ngTemplateOutlet]="step.content" />
+            </div>
+          }
+        </div>
+      </li>
+    }
+  </ol>
+}
+
+<ng-template #header let-step let-i="index">
+  <button
+    type="button"
+    role="tab"
+    class="focus-visible:ring-ring/50 flex min-w-0 items-center gap-2 rounded-md text-start outline-none focus-visible:ring-3 disabled:cursor-not-allowed"
+    [id]="_getStepLabelId(i)"
+    [attr.aria-selected]="i === selectedIndex"
+    [attr.aria-controls]="_getStepContentId(i)"
+    [disabled]="!step.isNavigable()"
+    (click)="step.select()"
+  >
+    <span [class]="indicatorClass(i, step.completed)">
+      @if (step.completed && i !== selectedIndex) {
+        <ng-icon name="lucideCheck" />
+      } @else {
+        {{ i + 1 }}
+      }
+    </span>
+    <span
+      class="truncate text-sm"
+      [class]="i === selectedIndex ? 'text-foreground font-medium' : 'text-muted-foreground'"
+    >
+      {{ step.label }}
+    </span>
+  </button>
+</ng-template>

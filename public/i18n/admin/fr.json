@@ -1,0 +1,9 @@
+{
+  "title": "Utilisateurs",
+  "subtitle": "Comptes de démonstration connus du fournisseur d'identité (Administrateur uniquement).",
+  "columns": {
+    "name": "Nom",
+    "email": "E-mail",
+    "roles": "Rôles"
+  }
+}

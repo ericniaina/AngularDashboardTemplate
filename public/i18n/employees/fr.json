@@ -1,0 +1,38 @@
+{
+  "title": "Employés",
+  "subtitle": "CRUD avec une clé étrangère (service) et une date d'embauche localisée, enregistrée au format ISO.",
+  "actions": {
+    "new": "Nouvel employé"
+  },
+  "columns": {
+    "firstName": "Prénom",
+    "lastName": "Nom",
+    "email": "E-mail",
+    "department": "Service",
+    "hireDate": "Date d'embauche"
+  },
+  "dialog": {
+    "newTitle": "Nouvel employé",
+    "editTitle": "Modifier l'employé",
+    "description": "La date d'embauche est saisie et affichée au format de votre langue, mais toujours enregistrée en aaaa-MM-jj."
+  },
+  "fields": {
+    "firstName": "Prénom",
+    "lastName": "Nom",
+    "email": "E-mail",
+    "department": "Service",
+    "departmentPlaceholder": "Choisir un service",
+    "hireDate": "Date d'embauche"
+  },
+  "validation": {
+    "hireDateFuture": "La date d'embauche ne peut pas être dans le futur."
+  },
+  "messages": {
+    "created": "Employé créé.",
+    "updated": "Employé modifié.",
+    "deleted": "Employé supprimé.",
+    "deleteFailed": "L'employé n'a pas pu être supprimé.",
+    "deleteTitle": "Supprimer l'employé ?",
+    "deleteMessage": "{name} sera définitivement supprimé. Cette action est irréversible."
+  }
+}

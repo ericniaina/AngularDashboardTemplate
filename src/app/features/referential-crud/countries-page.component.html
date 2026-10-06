@@ -1,0 +1,111 @@
+<app-page-header
+  [title]="'countries.title' | transloco"
+  [subtitle]="'countries.subtitle' | transloco"
+>
+  @if (!canWrite()) {
+    <span pageBadge hlmBadge variant="secondary">
+      <ng-icon name="lucideLock" />
+      {{ 'common.readOnly' | transloco }}
+    </span>
+  } @else {
+    <button hlmBtn type="button" (click)="openDialog(null)">
+      <ng-icon name="lucidePlus" />
+      {{ 'countries.actions.new' | transloco }}
+    </button>
+  }
+</app-page-header>
+
+<app-data-table
+  [rowData]="store.loaded() ? store.countries() : null"
+  [columnDefs]="columnDefs()"
+  [getRowId]="getRowId"
+  [externalFilter]="externalFilter()"
+  [loading]="store.loading()"
+  (rowDoubleClicked)="openDialog($event)"
+>
+  <button
+    tableActions
+    hlmBtn
+    variant="outline"
+    type="button"
+    aria-controls="country-filters"
+    [attr.aria-expanded]="filtersOpen()"
+    (click)="filtersOpen.set(!filtersOpen())"
+  >
+    <ng-icon name="lucideFilter" />
+    {{ 'countries.filter.toggle' | transloco }}
+    @if (activeFilterCount() > 0) {
+      <span hlmBadge>{{ activeFilterCount() }}</span>
+    }
+  </button>
+
+  @if (filtersOpen()) {
+    <section hlmCard id="country-filters" size="sm" [formGroup]="filterForm">
+      <div hlmCardContent class="grid gap-4 md:grid-cols-3">
+        <div hlmField>
+          <label hlmFieldLabel for="filter-name">{{
+            'countries.filter.nameContains' | transloco
+          }}</label>
+          <input hlmInput id="filter-name" formControlName="nameContains" autocomplete="off" />
+        </div>
+
+        <div hlmField>
+          <label hlmFieldLabel for="filter-regions">{{
+            'countries.filter.regions' | transloco
+          }}</label>
+          <hlm-select-multiple formControlName="regions" [itemToString]="regionLabel">
+            <hlm-select-trigger class="w-full" buttonId="filter-regions">
+              <hlm-select-placeholder>{{
+                'countries.filter.anyRegion' | transloco
+              }}</hlm-select-placeholder>
+              <ng-template hlmSelectValues let-values>
+                <hlm-select-values-content>
+                  {{ regionLabel(values[0]) }}
+                  @if (values.length > 1) {
+                    <span class="text-muted-foreground">+{{ values.length - 1 }}</span>
+                  }
+                </hlm-select-values-content>
+              </ng-template>
+            </hlm-select-trigger>
+            <hlm-select-content *hlmSelectPortal>
+              @for (region of regions; track region) {
+                <hlm-select-item [value]="region">{{ regionText()[region] }}</hlm-select-item>
+              }
+            </hlm-select-content>
+          </hlm-select-multiple>
+        </div>
+
+        <fieldset class="flex flex-col gap-2">
+          <legend class="mb-2 text-sm font-medium">
+            {{ 'countries.filter.status' | transloco }}
+          </legend>
+          <hlm-radio-group formControlName="status" class="flex h-9 flex-wrap items-center gap-4">
+            @for (status of statuses; track status) {
+              <div class="flex items-center gap-2">
+                <hlm-radio [value]="status" [inputId]="'filter-status-' + status">
+                  <hlm-radio-indicator indicator />
+                </hlm-radio>
+                <label hlmLabel [for]="'filter-status-' + status">{{
+                  'common.status.' + status | transloco
+                }}</label>
+              </div>
+            }
+          </hlm-radio-group>
+        </fieldset>
+      </div>
+      <div hlmCardFooter class="justify-end">
+        <button
+          hlmBtn
+          variant="ghost"
+          size="sm"
+          type="button"
+          [disabled]="activeFilterCount() === 0"
+          (click)="resetFilters()"
+        >
+          <ng-icon name="lucideRotateCcw" />
+          {{ 'common.actions.reset' | transloco }}
+        </button>
+      </div>
+    </section>
+  }
+</app-data-table>

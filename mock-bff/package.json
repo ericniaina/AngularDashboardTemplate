@@ -1,0 +1,15 @@
+{
+  "name": "mock-bff",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Dev-only mock BFF: SSO session via httpOnly cookie, refresh, CSRF header check, demo CRUD APIs.",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node --watch server.js"
+  },
+  "dependencies": {
+    "cookie-parser": "^1.4.7",
+    "express": "^5.1.0"
+  }
+}

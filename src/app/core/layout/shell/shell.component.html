@@ -1,0 +1,71 @@
+<hlm-sidebar-wrapper>
+  <hlm-sidebar
+    collapsible="icon"
+    [srOnlySheetTitle]="'layout.navigation' | transloco"
+    [srOnlySheetDescription]="'layout.navigationDescription' | transloco"
+  >
+    <hlm-sidebar-header>
+      <ul hlmSidebarMenu>
+        <li hlmSidebarMenuItem>
+          <a
+            hlmSidebarMenuButton
+            size="lg"
+            routerLink="/dashboard"
+            [tooltip]="'app.title' | transloco"
+          >
+            <span
+              class="bg-sidebar-primary text-sidebar-primary-foreground flex size-8 shrink-0 items-center justify-center rounded-md"
+            >
+              <ng-icon name="lucideLayoutGrid" />
+            </span>
+            <span class="truncate font-semibold" [title]="'app.title' | transloco">{{
+              'app.title' | transloco
+            }}</span>
+          </a>
+        </li>
+      </ul>
+    </hlm-sidebar-header>
+
+    <hlm-sidebar-content>
+      @for (section of menu(); track section.labelKey) {
+        <hlm-sidebar-group>
+          <div hlmSidebarGroupLabel>{{ section.labelKey | transloco }}</div>
+          <ul hlmSidebarMenu>
+            @for (item of section.items; track item.route) {
+              <li hlmSidebarMenuItem>
+                <a
+                  hlmSidebarMenuButton
+                  [routerLink]="item.route"
+                  routerLinkActive
+                  #rla="routerLinkActive"
+                  [isActive]="rla.isActive"
+                  [attr.aria-current]="rla.isActive ? 'page' : null"
+                  [tooltip]="item.labelKey | transloco"
+                >
+                  <ng-icon [name]="item.icon" />
+                  <span>{{ item.labelKey | transloco }}</span>
+                </a>
+              </li>
+            }
+          </ul>
+        </hlm-sidebar-group>
+      }
+    </hlm-sidebar-content>
+  </hlm-sidebar>
+
+  <main hlmSidebarInset class="min-w-0">
+    <header
+      class="bg-background sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 border-b px-4"
+    >
+      <button hlmSidebarTrigger [srOnlyText]="'layout.toggleSidebar' | transloco"></button>
+      <div class="flex-1"></div>
+      <app-language-switcher />
+      <app-theme-toggle />
+      <app-user-menu />
+    </header>
+
+    <div class="mx-auto w-full max-w-screen-2xl p-4 md:p-6">
+      <router-outlet />
+    </div>
+  </main>
+</hlm-sidebar-wrapper>

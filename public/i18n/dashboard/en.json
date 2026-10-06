@@ -1,0 +1,49 @@
+{
+  "title": "Dashboard",
+  "subtitle": "Activity and key figures at a glance.",
+  "kpis": {
+    "referentialItems": "Referential items",
+    "openOrderLines": "Open order lines",
+    "activeUsers": "Active users",
+    "pendingApprovals": "Pending approvals",
+    "vsPrevious": "vs previous period"
+  },
+  "chart": {
+    "activityTitle": "Activity",
+    "activityDescription": "Sign-ins and changes over the last 30 days.",
+    "regionsTitle": "Countries by region",
+    "regionsDescription": "Referential countries per region.",
+    "signIns": "Sign-ins",
+    "changes": "Changes"
+  },
+  "recentCountries": {
+    "title": "Recently updated countries",
+    "description": "The five most recent changes in the referential.",
+    "viewAll": "View all",
+    "columns": {
+      "code": "Code",
+      "name": "Name",
+      "region": "Region",
+      "updatedAt": "Updated"
+    }
+  },
+  "activity": {
+    "title": "Recent activity",
+    "types": {
+      "create": "{{user}} created {{entity}} “{{label}}”",
+      "update": "{{user}} updated {{entity}} “{{label}}”",
+      "delete": "{{user}} deleted {{entity}} “{{label}}”",
+      "save": "{{user}} saved {{label}} {{entity}}"
+    },
+    "entities": {
+      "country": "country",
+      "employee": "employee",
+      "orderLines": "order lines"
+    }
+  },
+  "quickLinks": {
+    "title": "Quick links",
+    "description": "Shortcuts to the pages your role can access.",
+    "tryForbidden": "Try a forbidden API call (403)"
+  }
+}

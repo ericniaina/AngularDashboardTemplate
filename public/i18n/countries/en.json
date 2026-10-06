@@ -1,0 +1,46 @@
+{
+  "title": "Countries",
+  "subtitle": "Referential data: a simple CRUD with column filters, global search and an advanced filter.",
+  "actions": {
+    "new": "New country"
+  },
+  "columns": {
+    "code": "Code",
+    "name": "Name",
+    "region": "Region",
+    "status": "Status"
+  },
+  "filter": {
+    "toggle": "Advanced filter",
+    "nameContains": "Name contains",
+    "regions": "Regions",
+    "anyRegion": "Any region",
+    "status": "Status"
+  },
+  "dialog": {
+    "newTitle": "New country",
+    "editTitle": "Edit country",
+    "viewTitle": "Country",
+    "description": "Countries are used as reference data across the application."
+  },
+  "fields": {
+    "code": "ISO code",
+    "name": "Name",
+    "region": "Region",
+    "regionPlaceholder": "Select a region",
+    "active": "Active",
+    "activeHint": "Inactive countries are hidden from pickers."
+  },
+  "validation": {
+    "code": "2 or 3 letters.",
+    "duplicate": "This code is already used by another country."
+  },
+  "messages": {
+    "created": "Country created.",
+    "updated": "Country updated.",
+    "deleted": "Country deleted.",
+    "deleteFailed": "The country couldn't be deleted.",
+    "deleteTitle": "Delete country?",
+    "deleteMessage": "“{name}” will be permanently deleted. This can't be undone."
+  }
+}

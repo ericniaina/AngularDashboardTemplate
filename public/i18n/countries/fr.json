@@ -1,0 +1,46 @@
+{
+  "title": "Pays",
+  "subtitle": "Données de référence : un CRUD simple avec filtres par colonne, recherche globale et filtre avancé.",
+  "actions": {
+    "new": "Nouveau pays"
+  },
+  "columns": {
+    "code": "Code",
+    "name": "Nom",
+    "region": "Région",
+    "status": "Statut"
+  },
+  "filter": {
+    "toggle": "Filtre avancé",
+    "nameContains": "Le nom contient",
+    "regions": "Régions",
+    "anyRegion": "Toutes les régions",
+    "status": "Statut"
+  },
+  "dialog": {
+    "newTitle": "Nouveau pays",
+    "editTitle": "Modifier le pays",
+    "viewTitle": "Pays",
+    "description": "Les pays servent de données de référence dans toute l'application."
+  },
+  "fields": {
+    "code": "Code ISO",
+    "name": "Nom",
+    "region": "Région",
+    "regionPlaceholder": "Choisir une région",
+    "active": "Actif",
+    "activeHint": "Les pays inactifs n'apparaissent pas dans les listes de choix."
+  },
+  "validation": {
+    "code": "2 ou 3 lettres.",
+    "duplicate": "Ce code est déjà utilisé par un autre pays."
+  },
+  "messages": {
+    "created": "Pays créé.",
+    "updated": "Pays modifié.",
+    "deleted": "Pays supprimé.",
+    "deleteFailed": "Le pays n'a pas pu être supprimé.",
+    "deleteTitle": "Supprimer le pays ?",
+    "deleteMessage": "« {name} » sera définitivement supprimé. Cette action est irréversible."
+  }
+}

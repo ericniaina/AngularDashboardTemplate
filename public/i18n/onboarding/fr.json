@@ -1,0 +1,46 @@
+{
+  "title": "Assistant d'intégration",
+  "subtitle": "Un formulaire en plusieurs étapes : chaque étape est validée avant la suivante, la dernière récapitule tout.",
+  "steps": {
+    "personal": "Informations personnelles",
+    "job": "Poste et service",
+    "access": "Accès",
+    "review": "Récapitulatif"
+  },
+  "fields": {
+    "name": "Nom",
+    "firstName": "Prénom",
+    "lastName": "Nom",
+    "email": "E-mail",
+    "birthDate": "Date de naissance",
+    "department": "Service",
+    "departmentPlaceholder": "Choisir un service",
+    "jobTitle": "Intitulé du poste",
+    "startDate": "Date d'arrivée"
+  },
+  "access": {
+    "legend": "Rôles dans l'application",
+    "description": "Choisissez au moins un rôle pour le nouvel employé.",
+    "roles": {
+      "Admin": "Accès complet, y compris les utilisateurs et les lignes de commande.",
+      "Manager": "Gère les pays, les employés et les intégrations.",
+      "Viewer": "Accès en lecture seule au tableau de bord et aux pays."
+    }
+  },
+  "review": {
+    "sentAs": "envoyé sous la forme"
+  },
+  "validation": {
+    "atLeastOneRole": "Sélectionnez au moins un rôle.",
+    "birthDateFuture": "La date de naissance ne peut pas être dans le futur."
+  },
+  "done": {
+    "title": "Intégration envoyée",
+    "message": "La demande pour le nouvel employé a été envoyée.",
+    "startAnother": "Commencer une autre",
+    "backToDashboard": "Retour au tableau de bord"
+  },
+  "messages": {
+    "submitFailed": "La demande n'a pas pu être envoyée. Réessayez."
+  }
+}

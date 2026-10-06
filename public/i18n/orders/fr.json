@@ -1,0 +1,26 @@
+{
+  "title": "Lignes de commande",
+  "subtitle": "Une grille modifiable : les changements restent locaux jusqu'à l'enregistrement de l'ensemble.",
+  "actions": {
+    "add": "Ajouter une ligne",
+    "duplicate": "Dupliquer ({{count}})",
+    "remove": "Supprimer ({{count}})",
+    "discard": "Annuler les modifications"
+  },
+  "columns": {
+    "product": "Produit",
+    "quantity": "Quantité",
+    "unitPrice": "Prix unitaire",
+    "amount": "Montant",
+    "total": "Total"
+  },
+  "messages": {
+    "invalidLines": "{count} ligne(s) à corriger : choisissez un produit, une quantité d'au moins 1 et un prix positif ou nul.",
+    "saved": "Lignes de commande enregistrées.",
+    "saveFailed": "Les lignes de commande n'ont pas pu être enregistrées.",
+    "leaveTitle": "Quitter sans enregistrer ?",
+    "leaveMessage": "Vos modifications des lignes de commande n'ont pas été enregistrées et seront perdues.",
+    "leave": "Quitter",
+    "stay": "Rester"
+  }
+}

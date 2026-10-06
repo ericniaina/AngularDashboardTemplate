@@ -1,0 +1,52 @@
+@if (quickFilter()) {
+  <div class="flex flex-wrap items-center gap-2">
+    <div class="relative w-full sm:w-72">
+      <ng-icon
+        name="lucideSearch"
+        class="text-muted-foreground pointer-events-none absolute start-2.5 top-1/2 -translate-y-1/2"
+        aria-hidden="true"
+      />
+      <input
+        hlmInput
+        type="search"
+        class="ps-8"
+        [value]="search()"
+        (input)="search.set($any($event.target).value)"
+        [placeholder]="'common.table.search' | transloco"
+        [attr.aria-label]="'common.table.search' | transloco"
+      />
+    </div>
+    <div class="ms-auto flex flex-wrap items-center gap-2">
+      <ng-content select="[tableActions]" />
+    </div>
+  </div>
+}
+
+<ng-content />
+
+<ag-grid-angular
+  *appRecreateOn="localeKey()"
+  class="w-full"
+  [style.height]="height()"
+  [theme]="theme"
+  [gridOptions]="options()"
+  [domLayout]="height() ? 'normal' : 'autoHeight'"
+  [rowData]="rowData()"
+  [columnDefs]="columnDefs()"
+  [defaultColDef]="defaultColDef"
+  [getRowId]="getRowId()"
+  [quickFilterText]="search()"
+  [isExternalFilterPresent]="isExternalFilterPresent"
+  [doesExternalFilterPass]="doesExternalFilterPass"
+  [pagination]="pagination()"
+  [paginationPageSize]="pageSize()"
+  [paginationPageSizeSelector]="[10, 20, 50]"
+  [pinnedBottomRowData]="pinnedBottomRowData()"
+  [loading]="loading()"
+  [localeText]="localeText()"
+  (gridReady)="onGridReady($event)"
+  (gridPreDestroyed)="onGridDestroyed()"
+  (rowDoubleClicked)="$event.data && !$event.rowPinned && rowDoubleClicked.emit($event.data)"
+  (cellEditRequest)="cellEditRequest.emit($event)"
+  (selectionChanged)="onSelectionChanged()"
+/>

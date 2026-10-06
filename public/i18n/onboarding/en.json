@@ -1,0 +1,46 @@
+{
+  "title": "Onboarding wizard",
+  "subtitle": "A multistep form: each step validates before the next, and the last one reviews everything.",
+  "steps": {
+    "personal": "Personal info",
+    "job": "Role & department",
+    "access": "Access",
+    "review": "Review"
+  },
+  "fields": {
+    "name": "Name",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "email": "Email",
+    "birthDate": "Date of birth",
+    "department": "Department",
+    "departmentPlaceholder": "Select a department",
+    "jobTitle": "Job title",
+    "startDate": "Start date"
+  },
+  "access": {
+    "legend": "Application roles",
+    "description": "Choose at least one role for the new employee.",
+    "roles": {
+      "Admin": "Full access, including users and order lines.",
+      "Manager": "Manages countries, employees and onboarding.",
+      "Viewer": "Read-only access to the dashboard and countries."
+    }
+  },
+  "review": {
+    "sentAs": "sent as"
+  },
+  "validation": {
+    "atLeastOneRole": "Select at least one role.",
+    "birthDateFuture": "The date of birth can't be in the future."
+  },
+  "done": {
+    "title": "Onboarding submitted",
+    "message": "The new employee's request was sent.",
+    "startAnother": "Start another",
+    "backToDashboard": "Back to dashboard"
+  },
+  "messages": {
+    "submitFailed": "The request couldn't be submitted. Please try again."
+  }
+}
