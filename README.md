@@ -2,7 +2,7 @@
 
 A starter for Angular admin dashboards with SSO login through a BFF (backend-for-frontend), role-based access, and worked examples of the screens most dashboards need.
 
-Angular 21 · Tailwind CSS 4 + spartan/ui · AG Grid Community · ng2-charts · Transloco (en/fr) · signals, zoneless · Vitest
+Angular 21 · Tailwind CSS 4 + spartan/ui · Angular CDK tables · ng2-charts · Transloco (en/fr) · signals, zoneless · Vitest
 
 ## Quick start
 
@@ -38,7 +38,7 @@ Across the app:
 - **Session:** httpOnly cookie held by the BFF (no tokens in the browser). A 401 triggers a transparent refresh and retry, and a CSRF header is sent on every call.
 - **Roles:** declared once in `core/auth/access-policy.ts`. They drive the routes, the menu and in-page checks, and the BFF enforces the same rules.
 - **Language:** English/French switch. Grids, charts, numbers and dates all follow it, and the choice persists across sessions. i18n is confined to `core/i18n/` so it can be removed (see `CLAUDE.md`).
-- **Dark mode:** toggle that defaults to the OS preference. Everything, including AG Grid and the charts, reads the same theme variables, so rebranding means editing one block of CSS variables in `src/styles.css`.
+- **Dark mode:** toggle that defaults to the OS preference. Everything, including the tables and the charts, reads the same theme variables, so rebranding means editing one block of CSS variables in `src/styles.css`.
 
 ## Scripts
 

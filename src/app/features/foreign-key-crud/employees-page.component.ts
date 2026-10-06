@@ -4,12 +4,14 @@ import { lucidePlus } from '@ng-icons/lucide';
 import { toast } from '@spartan-ng/brain/sonner';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmDialogService } from '@spartan-ng/helm/dialog';
-import type { ColDef } from 'ag-grid-community';
 import { interpolate, translateGroup, TranslocoPipe } from '../../core/i18n';
 import { LocaleService } from '../../core/locale';
 import { ConfirmDialogService } from '../../shared/components/confirm-dialog';
 import { DataTableComponent } from '../../shared/components/data-table/data-table.component';
-import { rowActionsColumn } from '../../shared/components/data-table/row-actions-cell.component';
+import type {
+  DataTableColumn,
+  RowAction,
+} from '../../shared/components/data-table/data-table.model';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { formatLocalizedDate } from '../../shared/date/date-format.util';
 import { DepartmentsService } from '../../shared/lookups/departments.service';
@@ -37,11 +39,13 @@ import { EmployeesStore } from './employees.store';
     </app-page-header>
 
     <app-data-table
-      [rowData]="ready() ? rows() : null"
-      [columnDefs]="columnDefs()"
-      [getRowId]="getRowId"
+      [label]="'employees.title' | transloco"
+      [rows]="ready() ? rows() : null"
+      [columns]="columns()"
+      [rowId]="rowId"
+      [actions]="rowActions()"
       [loading]="!ready()"
-      (rowDoubleClicked)="openDialog($event)"
+      (rowActivate)="openDialog($event)"
     />
   `,
 })
@@ -55,9 +59,7 @@ export class EmployeesPageComponent {
   private readonly columnText = translateGroup<
     'firstName' | 'lastName' | 'email' | 'department' | 'hireDate'
   >('employees.columns');
-  private readonly actionText = translateGroup<'edit' | 'delete' | 'cancel' | 'rowActions'>(
-    'common.actions',
-  );
+  private readonly actionText = translateGroup<'edit' | 'delete' | 'cancel'>('common.actions');
   private readonly text = translateGroup<
     'deleteTitle' | 'deleteMessage' | 'created' | 'updated' | 'deleted' | 'deleteFailed'
   >('employees.messages');
@@ -70,45 +72,49 @@ export class EmployeesPageComponent {
     toEmployeeRows(this.store.employees(), this.departments.nameById()),
   );
 
-  protected readonly columnDefs = computed<ColDef<EmployeeRow>[]>(() => {
+  protected readonly columns = computed<DataTableColumn<EmployeeRow>[]>(() => {
     const text = this.columnText();
-    const actions = this.actionText();
     const locale = this.locale();
     return [
-      { field: 'firstName', headerName: text.firstName },
-      { field: 'lastName', headerName: text.lastName },
-      { field: 'email', headerName: text.email, minWidth: 220 },
-      { field: 'departmentName', headerName: text.department },
+      { id: 'firstName', header: text.firstName, value: (e) => e.firstName },
+      { id: 'lastName', header: text.lastName, value: (e) => e.lastName },
+      { id: 'email', header: text.email, value: (e) => e.email },
       {
-        field: 'hireDate',
-        headerName: text.hireDate,
-        // Sort/filter on the raw ISO value; show it localized.
-        cellDataType: 'dateString',
-        valueFormatter: (p) => formatLocalizedDate(p.value as string, locale, 'mediumDate'),
-        getQuickFilterText: (p) => formatLocalizedDate(p.value as string, locale, 'mediumDate'),
+        id: 'department',
+        header: text.department,
+        // The foreign key is resolved into the row, so sort/search work on the name.
+        value: (e) => e.departmentName,
+        filter: {
+          type: 'select',
+          options: this.departments.departments().map((d) => ({ value: d.name, label: d.name })),
+        },
       },
-      rowActionsColumn<EmployeeRow>(
-        [
-          {
-            id: 'edit',
-            label: actions.edit,
-            icon: 'lucidePencil',
-            run: (row) => this.openDialog(row),
-          },
-          {
-            id: 'delete',
-            label: actions.delete,
-            icon: 'lucideTrash2',
-            destructive: true,
-            run: (row) => this.delete(row),
-          },
-        ],
-        actions.rowActions,
-      ),
+      {
+        id: 'hireDate',
+        header: text.hireDate,
+        // Sorts on the raw ISO value; shown (and text-filtered) localized.
+        value: (e) => e.hireDate,
+        display: (e) => formatLocalizedDate(e.hireDate, locale, 'mediumDate'),
+        cellClass: 'w-40',
+      },
     ];
   });
 
-  protected readonly getRowId = (p: { data: EmployeeRow }) => p.data.id;
+  protected readonly rowActions = computed<RowAction<EmployeeRow>[]>(() => {
+    const actions = this.actionText();
+    return [
+      { id: 'edit', label: actions.edit, icon: 'lucidePencil', run: (row) => this.openDialog(row) },
+      {
+        id: 'delete',
+        label: actions.delete,
+        icon: 'lucideTrash2',
+        destructive: true,
+        run: (row) => this.delete(row),
+      },
+    ];
+  });
+
+  protected readonly rowId = (employee: EmployeeRow) => employee.id;
 
   constructor() {
     void this.store.load().catch(() => undefined);

@@ -13,14 +13,6 @@ export interface OrderLine {
 
 export type EditableField = 'productId' | 'quantity' | 'unitPrice';
 
-/** A grid row: a line, or the pinned totals row. */
-export interface OrderLineRow extends OrderLine {
-  amount: number | null;
-  isTotal?: boolean;
-}
-
-export const TOTALS_ROW_ID = '__totals__';
-
 // ------------------------------------------------------------------ pure row logic (unit-tested)
 
 /** Which fields of a line are invalid: missing product, quantity < 1 (or not whole), negative price. */

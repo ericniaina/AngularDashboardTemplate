@@ -1,4 +1,4 @@
-@if (quickFilter()) {
+@if (search()) {
   <div class="flex flex-wrap items-center gap-2">
     <div class="relative w-full sm:w-72">
       <ng-icon
@@ -10,8 +10,8 @@
         hlmInput
         type="search"
         class="ps-8"
-        [value]="search()"
-        (input)="search.set($any($event.target).value)"
+        [value]="searchText()"
+        (input)="searchText.set($any($event.target).value)"
         [placeholder]="'common.table.search' | transloco"
         [attr.aria-label]="'common.table.search' | transloco"
       />
@@ -24,29 +24,338 @@
 
 <ng-content />
 
-<ag-grid-angular
-  *appRecreateOn="localeKey()"
-  class="w-full"
-  [style.height]="height()"
-  [theme]="theme"
-  [gridOptions]="options()"
-  [domLayout]="height() ? 'normal' : 'autoHeight'"
-  [rowData]="rowData()"
-  [columnDefs]="columnDefs()"
-  [defaultColDef]="defaultColDef"
-  [getRowId]="getRowId()"
-  [quickFilterText]="search()"
-  [isExternalFilterPresent]="isExternalFilterPresent"
-  [doesExternalFilterPass]="doesExternalFilterPass"
-  [pagination]="pagination()"
-  [paginationPageSize]="pageSize()"
-  [paginationPageSizeSelector]="[10, 20, 50]"
-  [pinnedBottomRowData]="pinnedBottomRowData()"
-  [loading]="loading()"
-  [localeText]="localeText()"
-  (gridReady)="onGridReady($event)"
-  (gridPreDestroyed)="onGridDestroyed()"
-  (rowDoubleClicked)="$event.data && !$event.rowPinned && rowDoubleClicked.emit($event.data)"
-  (cellEditRequest)="cellEditRequest.emit($event)"
-  (selectionChanged)="onSelectionChanged()"
-/>
+<div
+  hlmTableContainer
+  class="bg-card rounded-lg border"
+  [class.overflow-y-auto]="!!height()"
+  [style.max-height]="height()"
+>
+  <table
+    cdk-table
+    hlmTable
+    [dataSource]="page().rows"
+    [trackBy]="trackBy"
+    [attr.aria-label]="label()"
+  >
+    <!-- Selection -->
+    @if (selectable()) {
+      <ng-container [cdkColumnDef]="selectColumn">
+        <th cdk-header-cell *cdkHeaderCellDef hlmTh class="w-10">
+          <hlm-checkbox
+            [checked]="allFilteredSelected()"
+            [indeterminate]="someFilteredSelected()"
+            (checkedChange)="toggleAll($event)"
+            [aria-label]="'common.table.selectAll' | transloco"
+          />
+        </th>
+        <td cdk-cell *cdkCellDef="let row" hlmTd class="w-10">
+          <hlm-checkbox
+            [checked]="isSelected(row)"
+            (checkedChange)="toggleRow(row, $event)"
+            [aria-label]="'common.table.selectRow' | transloco"
+          />
+        </td>
+        <td cdk-footer-cell *cdkFooterCellDef hlmTd></td>
+      </ng-container>
+      <ng-container [cdkColumnDef]="filterColumnId(selectColumn)">
+        <th cdk-header-cell *cdkHeaderCellDef hlmTh></th>
+      </ng-container>
+    }
+
+    <!-- Data columns -->
+    @for (column of columns(); track column.id) {
+      <ng-container [cdkColumnDef]="column.id">
+        <th
+          cdk-header-cell
+          *cdkHeaderCellDef
+          hlmTh
+          scope="col"
+          [class]="column.cellClass ?? ''"
+          [class.text-end]="column.align === 'end'"
+          [attr.aria-sort]="ariaSort(column)"
+        >
+          @if (column.sortable !== false) {
+            <button
+              type="button"
+              class="hover:text-foreground focus-visible:ring-ring/50 -mx-1 inline-flex items-center gap-1 rounded-md px-1 py-0.5 outline-none focus-visible:ring-3"
+              [class.flex-row-reverse]="column.align === 'end'"
+              (click)="toggleSort(column)"
+            >
+              <span>{{ column.header }}</span>
+              @switch (ariaSort(column)) {
+                @case ('ascending') {
+                  <ng-icon name="lucideArrowUp" class="text-foreground" aria-hidden="true" />
+                }
+                @case ('descending') {
+                  <ng-icon name="lucideArrowDown" class="text-foreground" aria-hidden="true" />
+                }
+                @default {
+                  <ng-icon
+                    name="lucideChevronsUpDown"
+                    class="text-muted-foreground/60"
+                    aria-hidden="true"
+                  />
+                }
+              }
+            </button>
+          } @else {
+            {{ column.header }}
+          }
+        </th>
+        <td
+          cdk-cell
+          *cdkCellDef="let row"
+          hlmTd
+          [class]="column.cellClass ?? ''"
+          [class.text-end]="column.align === 'end'"
+          [class.tabular-nums]="column.align === 'end'"
+        >
+          @if (templates().get(column.id); as template) {
+            <ng-container *ngTemplateOutlet="template; context: { $implicit: row }" />
+          } @else {
+            {{ displayText(column, row) }}
+          }
+        </td>
+        <td
+          cdk-footer-cell
+          *cdkFooterCellDef
+          hlmTd
+          class="font-semibold"
+          [class.text-end]="column.align === 'end'"
+          [class.tabular-nums]="column.align === 'end'"
+        >
+          {{ footer()?.[column.id] ?? '' }}
+        </td>
+      </ng-container>
+
+      <!-- Filter cell for this column -->
+      <ng-container [cdkColumnDef]="filterColumnId(column.id)">
+        <th cdk-header-cell *cdkHeaderCellDef hlmTh class="h-auto py-2 font-normal">
+          @if (column.filter === false) {
+            <span class="sr-only">{{ column.header }}</span>
+          } @else if (column.filter?.type === 'select') {
+            <label class="sr-only" [for]="uid + '-filter-' + column.id">{{
+              'common.table.filterColumn' | transloco: { column: column.header }
+            }}</label>
+            <hlm-select
+              [value]="columnFilters()[column.id] ?? ''"
+              (valueChange)="setColumnFilter(column.id, $any($event) ?? '')"
+              [itemToString]="filterLabels().get(column.id)!"
+            >
+              <hlm-select-trigger
+                size="sm"
+                class="w-full min-w-28 font-normal"
+                [buttonId]="uid + '-filter-' + column.id"
+              >
+                <hlm-select-value [placeholder]="'common.table.all' | transloco" />
+              </hlm-select-trigger>
+              <hlm-select-content *hlmSelectPortal>
+                <hlm-select-item value="">{{ 'common.table.all' | transloco }}</hlm-select-item>
+                @if (column.filter?.type === 'select') {
+                  @for (option of $any(column.filter).options; track option.value) {
+                    <hlm-select-item [value]="option.value">{{ option.label }}</hlm-select-item>
+                  }
+                }
+              </hlm-select-content>
+            </hlm-select>
+          } @else {
+            <input
+              hlmInput
+              type="search"
+              class="h-8 min-w-24 font-normal"
+              [value]="columnFilters()[column.id] ?? ''"
+              (input)="setColumnFilter(column.id, $any($event.target).value)"
+              [attr.aria-label]="'common.table.filterColumn' | transloco: { column: column.header }"
+            />
+          }
+        </th>
+      </ng-container>
+    }
+
+    <!-- Row menu -->
+    @if (hasActions()) {
+      <ng-container [cdkColumnDef]="actionsColumn">
+        <th cdk-header-cell *cdkHeaderCellDef hlmTh class="w-12">
+          <span class="sr-only">{{ 'common.actions.rowActions' | transloco }}</span>
+        </th>
+        <td cdk-cell *cdkCellDef="let row" hlmTd class="w-12 py-1 text-end">
+          <button
+            hlmBtn
+            variant="ghost"
+            size="icon-sm"
+            type="button"
+            [hlmDropdownMenuTrigger]="menu"
+            [hlmDropdownMenuTriggerData]="{ $implicit: row }"
+            align="end"
+            [attr.aria-label]="'common.actions.rowActions' | transloco"
+          >
+            <ng-icon name="lucideEllipsis" />
+          </button>
+        </td>
+        <td cdk-footer-cell *cdkFooterCellDef hlmTd></td>
+      </ng-container>
+      <ng-container [cdkColumnDef]="filterColumnId(actionsColumn)">
+        <th cdk-header-cell *cdkHeaderCellDef hlmTh></th>
+      </ng-container>
+    }
+
+    <tr
+      cdk-header-row
+      *cdkHeaderRowDef="displayedColumns(); sticky: !!height()"
+      hlmTr
+      class="bg-muted/60 hover:bg-muted/60"
+    ></tr>
+    @if (showFilterRow()) {
+      <tr
+        cdk-header-row
+        *cdkHeaderRowDef="filterRowColumns(); sticky: !!height()"
+        hlmTr
+        class="bg-muted/30 hover:bg-muted/30"
+      ></tr>
+    }
+    <tr
+      cdk-row
+      *cdkRowDef="let row; columns: displayedColumns()"
+      hlmTr
+      [attr.data-state]="selectable() && isSelected(row) ? 'selected' : null"
+      (dblclick)="rowActivate.emit(row)"
+    ></tr>
+    <!-- Always declared (CDK doesn't pick up a footer row def added after the first render); hidden until there is a footer. -->
+    <tr
+      cdk-footer-row
+      *cdkFooterRowDef="displayedColumns(); sticky: !!height()"
+      hlmTr
+      class="bg-muted/60 hover:bg-muted/60"
+      [class.hidden]="!footer()"
+    ></tr>
+
+    <!-- Loading / empty -->
+    <tr *cdkNoDataRow>
+      <td [attr.colspan]="columnCount()" class="p-0">
+        @if (showSkeleton()) {
+          <div
+            class="flex flex-col gap-3 p-4"
+            role="status"
+            [attr.aria-label]="'common.table.loading' | transloco"
+          >
+            @for (i of [1, 2, 3, 4, 5]; track i) {
+              <div hlmSkeleton class="h-6 w-full"></div>
+            }
+          </div>
+        } @else {
+          <div class="flex flex-col items-center gap-2 px-4 py-10 text-center">
+            <ng-icon
+              [name]="isFiltered() ? 'lucideSearchX' : 'lucideInbox'"
+              class="text-muted-foreground text-2xl"
+              aria-hidden="true"
+            />
+            <p class="text-muted-foreground text-sm">
+              {{ (isFiltered() ? 'common.table.noMatches' : 'common.table.noRows') | transloco }}
+            </p>
+            @if (isFiltered()) {
+              <button hlmBtn variant="outline" size="sm" type="button" (click)="clearFilters()">
+                {{ 'common.table.clearFilters' | transloco }}
+              </button>
+            }
+          </div>
+        }
+      </td>
+    </tr>
+  </table>
+</div>
+
+<!-- One menu template, rendered for the row it was opened from. -->
+<ng-template #menu let-row>
+  <hlm-dropdown-menu class="w-44">
+    @for (action of actions(); track action.id) {
+      <button
+        hlmDropdownMenuItem
+        [class.text-destructive]="action.destructive"
+        (triggered)="action.run(row)"
+      >
+        <ng-icon [name]="action.icon" />
+        {{ action.label }}
+      </button>
+    }
+  </hlm-dropdown-menu>
+</ng-template>
+
+@if (pagination() && page().total > 0) {
+  <div class="flex flex-wrap items-center justify-end gap-x-6 gap-y-2 text-sm">
+    <div class="flex items-center gap-2">
+      <label class="text-muted-foreground" [for]="uid + '-page-size'">{{
+        'common.table.rowsPerPage' | transloco
+      }}</label>
+      <hlm-select
+        [value]="pageSize()"
+        (valueChange)="setPageSize($any($event))"
+        [itemToString]="pageSizeLabel"
+      >
+        <hlm-select-trigger size="sm" class="w-20" [buttonId]="uid + '-page-size'">
+          <hlm-select-value />
+        </hlm-select-trigger>
+        <hlm-select-content *hlmSelectPortal>
+          @for (size of pageSizes(); track size) {
+            <hlm-select-item [value]="size">{{ size }}</hlm-select-item>
+          }
+        </hlm-select-content>
+      </hlm-select>
+    </div>
+    <span class="text-muted-foreground tabular-nums" aria-live="polite">
+      {{
+        'common.table.range' | transloco: { from: page().from, to: page().to, total: page().total }
+      }}
+    </span>
+    <div class="flex items-center gap-1">
+      <button
+        hlmBtn
+        variant="outline"
+        size="icon-sm"
+        type="button"
+        [disabled]="page().pageIndex === 0"
+        (click)="goTo(0)"
+        [attr.aria-label]="'common.table.firstPage' | transloco"
+      >
+        <ng-icon name="lucideChevronsLeft" />
+      </button>
+      <button
+        hlmBtn
+        variant="outline"
+        size="icon-sm"
+        type="button"
+        [disabled]="page().pageIndex === 0"
+        (click)="goTo(page().pageIndex - 1)"
+        [attr.aria-label]="'common.table.previousPage' | transloco"
+      >
+        <ng-icon name="lucideChevronLeft" />
+      </button>
+      <span class="px-2 tabular-nums">
+        {{
+          'common.table.pageOf' | transloco: { page: page().pageIndex + 1, count: page().pageCount }
+        }}
+      </span>
+      <button
+        hlmBtn
+        variant="outline"
+        size="icon-sm"
+        type="button"
+        [disabled]="page().pageIndex >= page().pageCount - 1"
+        (click)="goTo(page().pageIndex + 1)"
+        [attr.aria-label]="'common.table.nextPage' | transloco"
+      >
+        <ng-icon name="lucideChevronRight" />
+      </button>
+      <button
+        hlmBtn
+        variant="outline"
+        size="icon-sm"
+        type="button"
+        [disabled]="page().pageIndex >= page().pageCount - 1"
+        (click)="goTo(page().pageCount - 1)"
+        [attr.aria-label]="'common.table.lastPage' | transloco"
+      >
+        <ng-icon name="lucideChevronsRight" />
+      </button>
+    </div>
+  </div>
+}

@@ -13,12 +13,14 @@ import { HlmInputImports } from '@spartan-ng/helm/input';
 import { HlmLabelImports } from '@spartan-ng/helm/label';
 import { HlmRadioGroupImports } from '@spartan-ng/helm/radio-group';
 import { HlmSelectImports } from '@spartan-ng/helm/select';
-import type { ColDef } from 'ag-grid-community';
 import { ACCESS, AuthService } from '../../core/auth';
 import { interpolate, translateGroup, TranslocoPipe } from '../../core/i18n';
 import { ConfirmDialogService } from '../../shared/components/confirm-dialog';
 import { DataTableComponent } from '../../shared/components/data-table/data-table.component';
-import { rowActionsColumn } from '../../shared/components/data-table/row-actions-cell.component';
+import type {
+  DataTableColumn,
+  RowAction,
+} from '../../shared/components/data-table/data-table.model';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { CountriesStore } from './countries.store';
 import {
@@ -74,14 +76,14 @@ export class CountriesPageComponent {
   );
   private readonly statusText = translateGroup<'active' | 'inactive'>('common.status');
   protected readonly regionText = translateGroup<Region>('common.regions');
-  private readonly actionText = translateGroup<
-    'edit' | 'delete' | 'view' | 'cancel' | 'rowActions'
-  >('common.actions');
+  private readonly actionText = translateGroup<'edit' | 'delete' | 'view' | 'cancel'>(
+    'common.actions',
+  );
   private readonly text = translateGroup<
     'deleteTitle' | 'deleteMessage' | 'created' | 'updated' | 'deleted' | 'deleteFailed'
   >('countries.messages');
 
-  // Advanced filter (AG Grid external filter)
+  // Advanced filter (the table's external filter)
   protected readonly regions = REGIONS;
   protected readonly statuses: StatusFilter[] = ['all', 'active', 'inactive'];
   protected readonly filtersOpen = signal(false);
@@ -105,61 +107,69 @@ export class CountriesPageComponent {
   );
   protected readonly regionLabel = (region: Region) => this.regionText()[region];
 
-  protected readonly columnDefs = computed<ColDef<Country>[]>(() => {
+  protected readonly columns = computed<DataTableColumn<Country>[]>(() => {
     const text = this.columnText();
     const regions = this.regionText();
     const status = this.statusText();
     const statusLabel = (active: boolean) => (active ? status.active : status.inactive);
-
-    const columns: ColDef<Country>[] = [
-      { field: 'code', headerName: text.code, maxWidth: 120 },
-      { field: 'name', headerName: text.name, minWidth: 180 },
+    return [
+      { id: 'code', header: text.code, value: (c) => c.code, cellClass: 'w-28' },
+      { id: 'name', header: text.name, value: (c) => c.name },
       {
-        field: 'region',
-        headerName: text.region,
-        // Users filter and search on the translated name they see, not the code.
-        valueFormatter: (p) => regions[p.value as Region] ?? p.value,
-        filterValueGetter: (p) => (p.data ? regions[p.data.region] : ''),
-        getQuickFilterText: (p) => regions[p.value as Region] ?? '',
+        id: 'region',
+        header: text.region,
+        value: (c) => c.region,
+        // Shown, sorted-by-search and filtered on the translated name users see.
+        display: (c) => regions[c.region],
+        filter: { type: 'select', options: REGIONS.map((r) => ({ value: r, label: regions[r] })) },
       },
       {
-        field: 'active',
-        headerName: text.status,
-        maxWidth: 150,
-        cellDataType: false,
-        valueFormatter: (p) => statusLabel(p.value as boolean),
-        filterValueGetter: (p) => (p.data ? statusLabel(p.data.active) : ''),
-        getQuickFilterText: (p) => statusLabel(p.value as boolean),
+        id: 'status',
+        header: text.status,
+        value: (c) => (c.active ? 'active' : 'inactive'),
+        display: (c) => statusLabel(c.active),
+        filter: {
+          type: 'select',
+          options: [
+            { value: 'active', label: status.active },
+            { value: 'inactive', label: status.inactive },
+          ],
+        },
+        cellClass: 'w-40',
       },
     ];
-
-    if (this.canWrite()) {
-      const actions = this.actionText();
-      columns.push(
-        rowActionsColumn<Country>(
-          [
-            {
-              id: 'edit',
-              label: actions.edit,
-              icon: 'lucidePencil',
-              run: (row) => this.openDialog(row),
-            },
-            {
-              id: 'delete',
-              label: actions.delete,
-              icon: 'lucideTrash2',
-              destructive: true,
-              run: (row) => this.delete(row),
-            },
-          ],
-          actions.rowActions,
-        ),
-      );
-    }
-    return columns;
   });
 
-  protected readonly getRowId = (p: { data: Country }) => p.data.id;
+  /** Writers edit/delete; readers get a View entry, so the dialog is reachable without a mouse. */
+  protected readonly rowActions = computed<RowAction<Country>[]>(() => {
+    const actions = this.actionText();
+    return this.canWrite()
+      ? [
+          {
+            id: 'edit',
+            label: actions.edit,
+            icon: 'lucidePencil',
+            run: (row) => this.openDialog(row),
+          },
+          {
+            id: 'delete',
+            label: actions.delete,
+            icon: 'lucideTrash2',
+            destructive: true,
+            run: (row) => this.delete(row),
+          },
+        ]
+      : [
+          {
+            id: 'view',
+            label: actions.view,
+            icon: 'lucideEye',
+            run: (row) => this.openDialog(row),
+          },
+        ];
+  });
+
+  protected readonly rowId = (country: Country) => country.id;
 
   constructor() {
     void this.store.load().catch(() => undefined);

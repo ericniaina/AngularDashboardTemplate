@@ -52,7 +52,22 @@
       "light": "Passer au thème clair"
     },
     "table": {
-      "search": "Rechercher dans toutes les colonnes…"
+      "search": "Rechercher dans toutes les colonnes…",
+      "all": "Tous",
+      "selectAll": "Sélectionner toutes les lignes",
+      "selectRow": "Sélectionner la ligne",
+      "filterColumn": "Filtrer {{column}}",
+      "loading": "Chargement…",
+      "noRows": "Aucune donnée pour le moment.",
+      "noMatches": "Aucune ligne ne correspond aux filtres.",
+      "clearFilters": "Effacer les filtres",
+      "rowsPerPage": "Lignes par page",
+      "range": "{{from}}–{{to}} sur {{total}}",
+      "pageOf": "Page {{page}} sur {{count}}",
+      "firstPage": "Première page",
+      "previousPage": "Page précédente",
+      "nextPage": "Page suivante",
+      "lastPage": "Dernière page"
     },
     "date": {
       "placeholder": "jj/mm/aaaa",

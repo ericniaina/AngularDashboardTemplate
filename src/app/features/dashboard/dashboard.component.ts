@@ -22,7 +22,6 @@ import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmCardImports } from '@spartan-ng/helm/card';
 import { HlmEmptyImports } from '@spartan-ng/helm/empty';
 import { HlmSkeletonImports } from '@spartan-ng/helm/skeleton';
-import type { ColDef } from 'ag-grid-community';
 import {
   ArcElement,
   CategoryScale,
@@ -41,6 +40,7 @@ import { MenuService } from '../../core/layout/menu.service';
 import { ThemeService } from '../../core/layout/theme.service';
 import { LocaleService } from '../../core/locale';
 import { DataTableComponent } from '../../shared/components/data-table/data-table.component';
+import type { DataTableColumn } from '../../shared/components/data-table/data-table.model';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { formatLocalizedDate } from '../../shared/date/date-format.util';
 import { LocalizedDatePipe } from '../../shared/pipes/localized-date.pipe';
@@ -257,30 +257,26 @@ export class DashboardComponent {
 
   protected readonly recentCountries = computed(() => this.data()?.recentCountries ?? []);
 
-  protected readonly recentCountryColumns = computed<ColDef<RecentCountry>[]>(() => {
+  protected readonly recentCountryColumns = computed<DataTableColumn<RecentCountry>[]>(() => {
     const text = this.columnText();
     const regions = this.regionText();
     const locale = this.locale();
-    // A compact preview: no filters or sorting, the full page has those.
-    const plain: ColDef<RecentCountry> = { sortable: false, filter: false, floatingFilter: false };
-    const columns: ColDef<RecentCountry>[] = [
-      { field: 'code', headerName: text.code, maxWidth: 110 },
-      { field: 'name', headerName: text.name },
+    // A compact preview: no sorting or filters, the full page has those.
+    const columns: DataTableColumn<RecentCountry>[] = [
+      { id: 'code', header: text.code, value: (c) => c.code, cellClass: 'w-20' },
+      { id: 'name', header: text.name, value: (c) => c.name },
+      { id: 'region', header: text.region, value: (c) => regions[c.region] ?? c.region },
       {
-        field: 'region',
-        headerName: text.region,
-        valueFormatter: (p) => regions[p.value as string] ?? p.value,
-      },
-      {
-        field: 'updatedAt',
-        headerName: text.updatedAt,
-        valueFormatter: (p) => formatLocalizedDate(p.value as string, locale, 'mediumDate'),
+        id: 'updatedAt',
+        header: text.updatedAt,
+        value: (c) => c.updatedAt,
+        display: (c) => formatLocalizedDate(c.updatedAt, locale, 'mediumDate'),
       },
     ];
-    return columns.map((col) => ({ ...plain, ...col }));
+    return columns.map((column) => ({ ...column, sortable: false, filter: false as const }));
   });
 
-  protected readonly getRecentCountryId = (p: { data: RecentCountry }) => p.data.id;
+  protected readonly recentCountryId = (country: RecentCountry) => country.id;
 
   protected retry(): void {
     this.summary.reload();

@@ -2,7 +2,7 @@
 
 This is the feature-by-feature prompt for the project. Conventions/how-to-build are in `CLAUDE.md` at the repo root — read both before implementing anything.
 
-**Status (2026-10-06): v2 implemented** on Node 24.13.0, Angular 21.2, TypeScript 5.9, Vitest 4, Tailwind CSS 4.3, spartan/ui 1.6 (brain + helm), AG Grid 36.2, ng2-charts 10, Transloco 8.4, Express 5 (mock BFF); verified with the unit suite and a headless-Edge walkthrough (every page, both languages, both themes, mobile, Admin and Viewer). Where implementation refined the plan, this document and `CLAUDE.md` were updated to match the code. (Built first on Angular 22; moved to Angular 21 on 2026-10-06 because Angular 22 requires Node 24.15+ and the project must run on Node 24.13.0.)
+**Status (2026-10-06): v2 implemented** on Node 24.13.0, Angular 21.2, TypeScript 5.9, Vitest 4, Tailwind CSS 4.3, spartan/ui 1.6 (brain + helm), Angular CDK table, ng2-charts 10, Transloco 8.4, Express 5 (mock BFF); verified with the unit suite and a headless-Edge walkthrough (every page, both languages, both themes, mobile, Admin and Viewer). Where implementation refined the plan, this document and `CLAUDE.md` were updated to match the code. (Built first on Angular 22; moved to Angular 21 on 2026-10-06 because Angular 22 requires Node 24.15+ and the project must run on Node 24.13.0. AG Grid was replaced the same day by a CDK-table-based `<app-data-table>`: the corporate npm proxy blocks packages that have a paid tier, community editions included.)
 
 **History:** v1 was built on Angular 22.2, Material 22.2, AG Grid 36.2, ng2-charts 10, Transloco 8.4 and Express 5 (mock BFF). Its behavior (auth, roles, grids, i18n, dates, mock BFF) was validated and carries over unchanged. v2 replaces the UI layer: Angular Material is out; Tailwind CSS v4 + spartan/ui + Angular CDK are in, with explicit look-and-feel rules (`CLAUDE.md` → "UI components", "Look & feel").
 
@@ -13,7 +13,7 @@ Decisions locked in:
 | Area | Choice |
 |---|---|
 | UI library | Tailwind CSS v4 + spartan/ui (brain + helm) + Angular CDK; Lucide icons |
-| Data grid | AG Grid Community |
+| Data tables | `<app-data-table>`: Angular CDK table + spartan table styling, own filter/sort/pagination logic (no grid library; no package with a paid tier) |
 | State management | Native signals + injectable services |
 | Project structure | Angular CLI, single app, standalone components |
 | Auth backend | Mock BFF (local Express server), swappable for a real one later |
@@ -100,10 +100,10 @@ All widget data comes from one call, `GET /api/dashboard/summary` (via `httpReso
 Suggested entity: **Countries** (or similar simple flat reference data — code, name, active flag).
 
 - Route: `/referential`.
-- `<app-data-table>` (AG Grid) listing all records:
-  - Per-column floating filter, sortable columns.
-  - A global search bar above the grid that filters across all columns at once (AG Grid quick filter) — including translated values (typing "asie" finds Asian countries in French).
-  - An "Advanced filter" panel (outline toggle button with an active-filter count badge; the panel is a collapsible card between the toolbar and the grid, with its fields in a responsive grid): name contains, region multi-select (`hlm-select` multiple), active/inactive/all (radio group). Implemented with AG Grid's Community *external filter*, combined with the column filters and quick filter. "Reset" clears it.
+- `<app-data-table>` listing all records:
+  - Sortable columns; a filter row with a text box for code and name, and dropdowns for region and status.
+  - A global search bar above the table that filters across all columns at once — on the displayed (translated) values, accent- and case-insensitive (typing "asie" finds Asian countries in French).
+  - An "Advanced filter" panel (outline toggle button with an active-filter count badge; the panel is a collapsible card between the toolbar and the grid, with its fields in a responsive grid): name contains, region multi-select (`hlm-select` multiple), active/inactive/all (radio group). Implemented through the table's `externalFilter` input, combined with the column filters and the search. "Reset" clears it.
 - Create / Edit via an `hlm-dialog` with a reactive form (validators: required, 2–3 letter code, max length, unique code checked against the loaded dataset). The BFF also rejects duplicates (409 → error shown on the code field). Save/delete outcomes are confirmed with a toast.
 - Dialog layout (reference for every CRUD dialog): title "New country" / "Edit country" + description; row 1 = Code (narrow) and Name in a `sm:grid-cols-2` grid; row 2 = Region, full width; row 3 = "Active" switch as a horizontal field with a description ("Inactive countries are hidden from pickers"); footer = Cancel (outline) + Save.
 - Delete with a confirm dialog (`shared/components/confirm-dialog`).
@@ -140,10 +140,10 @@ Suggested flow: **"New Employee Onboarding"** wizard (ties naturally into the Em
 Suggested entity: **Order Lines** (or invoice lines) — a grid that's fully client-editable before a single "Save" commits it.
 
 - Route: `/order-lines`.
-- AG Grid with inline cell editing: product (select editor; picking a product pre-fills its list price), quantity and unit price (number editors). Amounts are formatted as locale currency.
+- `<app-data-table>` whose cells are form controls: product (dropdown; picking a product pre-fills its list price), quantity and unit price (number inputs). Amounts are formatted as locale currency. No sorting or column filters on this table (a row must not move or disappear while it is edited); the global search stays.
 - Toolbar actions: **Add line** (blank row at the bottom, product cell opened for editing), **Duplicate (n)** (clones each selected row with a new client-side id, inserted right below its source), **Remove (n)**. Checkbox multi-selection. Actions are disabled while the initial load is in flight (otherwise the load response would wipe lines added meanwhile).
-- Row mutation state lives in `OrderLinesStore` — the grid runs with `readOnlyEdit`, so it is a view over the store's signal, never the source of truth.
-- Pinned totals row (total quantity, total amount) recalculates via `computed()`.
+- Row mutation state lives in `OrderLinesStore` — every control change goes to `store.edit()`, which produces a new array; the table is a view over the store's signal, never the source of truth.
+- Totals row (total quantity, total amount) in the table footer, sticky at the bottom of the fixed-height table, recalculated via `computed()`.
 - Invalid cells (missing product, quantity < 1, negative price) are outlined in the error color; the banner counts lines needing attention and **Save** stays disabled until they're fixed.
 - "Save" sends the full set with `PUT /api/order-lines`; until then everything is client-side. Dirty state = current lines differ from the last saved snapshot (editing a value back to its original makes it clean again). Unsaved changes trigger a confirm dialog when navigating away (`canDeactivate`) and the browser's leave-page prompt on reload/close. "Discard changes" restores the last saved state.
 
@@ -153,7 +153,7 @@ Suggested entity: **Order Lines** (or invoice lines) — a grid that's fully cli
 - First load: read `window.matchMedia('(prefers-color-scheme: dark)')` if no stored preference exists yet.
 - After that: user's manual choice wins, persisted in `localStorage` (a UI preference, not session state, so this doesn't conflict with the no-token-in-storage rule).
 - Applies via a single `dark` class on `<html>` (plus `color-scheme`); all color values come from the theme's CSS variables (`:root` / `.dark` in `styles.css`, generated by spartan's theme CLI) — no component branches on light/dark in TypeScript.
-- AG Grid's theme is built from the same variables, so grids follow automatically. Canvas charts read the variables and re-read them on toggle (see `CLAUDE.md` → Theming).
+- Tables are styled with the same token utilities, so they follow automatically. Canvas charts read the variables and re-read them on toggle (see `CLAUDE.md` → Theming).
 - Toggle is a topbar icon button (sun/moon), see section 2's topbar controls list.
 
 ## 10. i18n
@@ -162,7 +162,7 @@ Suggested entity: **Order Lines** (or invoice lines) — a grid that's fully cli
 - Two languages ship: `en` (default) and `fr`, switched from the topbar language control.
 - Translation JSON: root strings in `public/i18n/<lang>.json`; per-feature scopes (`dashboard`, `countries`, `employees`, `onboarding`, `orders`, `admin`) in `public/i18n/<scope>/<lang>.json`, preloaded with that feature's route.
 - Every user-facing string (menu labels, page titles, form labels/validation messages, dialog text, grid column headers, toolbar button labels, the 403 page, the login button, toasts, chart labels, icon-button `aria-label`s and tooltips, date-picker ARIA labels) is translated — via the `transloco` pipe in templates or `translateGroup()` in TypeScript.
-- AG Grid's own UI (filter menus, pagination, "no rows") is localized with `@ag-grid-community/locale`; the grid is re-created when the language changes because its `localeText` is read only at creation.
+- The table's own UI (search, filter labels, pagination, empty states) is localized through root keys under `common.table`, like any other string.
 - How to remove i18n entirely: see `CLAUDE.md` → "i18n — built to be removable".
 
 ## 11. Locale-aware date formatting (display only, value stays ISO)
@@ -230,4 +230,4 @@ Session state, refresh validity, and all entity data are in-memory only (reset o
 - End-to-end tests: v1 was verified with a throwaway headless-Edge walkthrough (login per role, EN/FR, dark mode, every example page, guards); committing a Playwright suite would lock that in, and it could also capture the look-and-feel check (screenshots in light/dark, en/fr, desktop/mobile).
 - Linting: no ESLint config yet (`ng add angular-eslint`); `prettier-plugin-tailwindcss` would keep class order consistent.
 - Brand: themed from the logo colors `#479595` / `#2e6a56` (`CLAUDE.md` → Brand). `public/logo.svg` is a placeholder until the real logo file is dropped in. Rebranding = editing the theme variables in `styles.css` and replacing the logo; nothing else.
-- AG Grid's date *filter* input is the browser's native date field, so its display follows the browser's language, not the app's.
+- Table column filters are "contains" text boxes or single-choice dropdowns; per-column operators (greater than, date ranges) are not implemented — add a filter type to `DataTableColumn` and `data-table.logic.ts` if a screen needs one.

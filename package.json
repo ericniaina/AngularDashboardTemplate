@@ -17,7 +17,6 @@
     "node": ">=24.13.0"
   },
   "dependencies": {
-    "@ag-grid-community/locale": "^36.2.0",
     "@angular/cdk": "^21.2.14",
     "@angular/common": "^21.2.25",
     "@angular/compiler": "^21.2.25",
@@ -29,8 +28,6 @@
     "@ng-icons/core": "^32.2.0",
     "@ng-icons/lucide": "^32.2.0",
     "@spartan-ng/brain": "^1.5.0",
-    "ag-grid-angular": "^36.2.0",
-    "ag-grid-community": "^36.2.0",
     "chart.js": "^4.5.1",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
@@ -43,7 +40,6 @@
     "@angular/build": "^21.2.25",
     "@angular/cli": "^21.2.25",
     "@angular/compiler-cli": "^21.2.25",
-    "@spartan-ng/cli": "^1.5.0",
     "@tailwindcss/postcss": "^4.3.3",
     "concurrently": "^10.0.5",
     "jsdom": "^29.1.1",

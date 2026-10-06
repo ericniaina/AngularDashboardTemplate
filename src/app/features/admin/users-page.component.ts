@@ -1,9 +1,9 @@
 import { httpResource } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, computed } from '@angular/core';
-import type { ColDef } from 'ag-grid-community';
 import type { User } from '../../core/auth';
 import { translateGroup, TranslocoPipe } from '../../core/i18n';
 import { DataTableComponent } from '../../shared/components/data-table/data-table.component';
+import type { DataTableColumn } from '../../shared/components/data-table/data-table.model';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 
 /** Admin-only, read-only list: an `httpResource` is enough, no store needed. */
@@ -17,9 +17,10 @@ import { PageHeaderComponent } from '../../shared/components/page-header/page-he
       [subtitle]="'admin.subtitle' | transloco"
     />
     <app-data-table
-      [rowData]="users.hasValue() ? users.value() : null"
-      [columnDefs]="columnDefs()"
-      [getRowId]="getRowId"
+      [label]="'admin.title' | transloco"
+      [rows]="users.hasValue() ? users.value() : null"
+      [columns]="columns()"
+      [rowId]="rowId"
       [loading]="users.isLoading()"
     />
   `,
@@ -30,23 +31,16 @@ export class UsersPageComponent {
   private readonly columnText = translateGroup<'name' | 'email' | 'roles'>('admin.columns');
   private readonly roleText = translateGroup<string>('roles');
 
-  protected readonly columnDefs = computed<ColDef<User>[]>(() => {
+  protected readonly columns = computed<DataTableColumn<User>[]>(() => {
     const text = this.columnText();
     const roles = this.roleText();
-    const roleLabels = (list: string[] | undefined) =>
-      (list ?? []).map((r) => roles[r] ?? r).join(', ');
+    const roleLabels = (user: User) => user.roles.map((r) => roles[r] ?? r).join(', ');
     return [
-      { field: 'name', headerName: text.name },
-      { field: 'email', headerName: text.email, minWidth: 220 },
-      {
-        field: 'roles',
-        headerName: text.roles,
-        valueFormatter: (p) => roleLabels(p.value as string[]),
-        filterValueGetter: (p) => roleLabels(p.data?.roles),
-        getQuickFilterText: (p) => roleLabels(p.value as string[]),
-      },
+      { id: 'name', header: text.name, value: (u) => u.name },
+      { id: 'email', header: text.email, value: (u) => u.email },
+      { id: 'roles', header: text.roles, value: roleLabels },
     ];
   });
 
-  protected readonly getRowId = (p: { data: User }) => p.data.id;
+  protected readonly rowId = (user: User) => user.id;
 }

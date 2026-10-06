@@ -20,17 +20,17 @@
 </app-page-header>
 
 <app-data-table
-  [rowData]="store.loaded() ? rows() : null"
-  [columnDefs]="columnDefs()"
-  [getRowId]="getRowId"
+  [label]="'orders.title' | transloco"
+  [rows]="store.loaded() ? store.lines() : null"
+  [columns]="columns()"
+  [rowId]="rowId"
   [loading]="store.loading()"
-  [pinnedBottomRowData]="store.loaded() ? pinnedTotals() : undefined"
+  [filters]="false"
   [pagination]="false"
-  [options]="gridOptions"
-  height="28rem"
-  (gridReady)="onGridReady($event)"
-  (cellEditRequest)="onCellEditRequest($event)"
-  (selectionChanged)="onSelectionChanged($event)"
+  [selectable]="true"
+  [(selected)]="selectedIds"
+  [footer]="store.loaded() ? footer() : null"
+  height="32rem"
 >
   <ng-container tableActions>
     <button hlmBtn variant="outline" type="button" [disabled]="store.loading()" (click)="addLine()">
@@ -69,4 +69,59 @@
       {{ invalidMessage() }}
     </div>
   }
+
+  <ng-template appCell="product" [appCellRows]="store.lines()" let-line>
+    <label class="sr-only" [for]="productControlId(line)">{{ columnText().product }}</label>
+    <hlm-select
+      [value]="line.productId"
+      (valueChange)="edit(line, 'productId', $event)"
+      [itemToString]="productName"
+    >
+      <hlm-select-trigger
+        size="sm"
+        class="w-full"
+        [buttonId]="productControlId(line)"
+        [forceInvalid]="hasError(line, 'productId')"
+      >
+        <hlm-select-value [placeholder]="'orders.placeholders.product' | transloco" />
+      </hlm-select-trigger>
+      <hlm-select-content *hlmSelectPortal>
+        @for (product of store.products(); track product.id) {
+          <hlm-select-item [value]="product.id">{{ product.name }}</hlm-select-item>
+        }
+      </hlm-select-content>
+    </hlm-select>
+  </ng-template>
+
+  <ng-template appCell="quantity" [appCellRows]="store.lines()" let-line>
+    <input
+      hlmInput
+      type="number"
+      inputmode="numeric"
+      min="1"
+      step="1"
+      class="h-8 text-end tabular-nums"
+      [value]="line.quantity ?? ''"
+      [forceInvalid]="hasError(line, 'quantity')"
+      [attr.aria-invalid]="hasError(line, 'quantity') || null"
+      [attr.aria-label]="columnText().quantity"
+      (change)="edit(line, 'quantity', $any($event.target).value)"
+    />
+  </ng-template>
+
+  <ng-template appCell="unitPrice" [appCellRows]="store.lines()" let-line>
+    <input
+      hlmInput
+      type="number"
+      inputmode="decimal"
+      min="0"
+      step="0.01"
+      class="h-8 text-end tabular-nums"
+      [value]="line.unitPrice ?? ''"
+      [forceInvalid]="hasError(line, 'unitPrice')"
+      [attr.aria-invalid]="hasError(line, 'unitPrice') || null"
+      [attr.aria-label]="columnText().unitPrice"
+      (change)="edit(line, 'unitPrice', $any($event.target).value)"
+    />
+  </ng-template>
 </app-data-table>

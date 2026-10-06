@@ -22,5 +22,8 @@
     "leaveMessage": "Your changes to the order lines haven't been saved and will be lost.",
     "leave": "Leave",
     "stay": "Stay"
+  },
+  "placeholders": {
+    "product": "Select a product"
   }
 }

@@ -118,10 +118,12 @@
         </div>
         <div hlmCardContent>
           <app-data-table
-            [rowData]="data() ? recentCountries() : null"
-            [columnDefs]="recentCountryColumns()"
-            [getRowId]="getRecentCountryId"
-            [quickFilter]="false"
+            [label]="'dashboard.recentCountries.title' | transloco"
+            [rows]="data() ? recentCountries() : null"
+            [columns]="recentCountryColumns()"
+            [rowId]="recentCountryId"
+            [search]="false"
+            [filters]="false"
             [pagination]="false"
             [loading]="!data()"
           />

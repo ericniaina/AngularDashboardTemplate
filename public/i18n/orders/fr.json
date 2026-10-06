@@ -22,5 +22,8 @@
     "leaveMessage": "Vos modifications des lignes de commande n'ont pas été enregistrées et seront perdues.",
     "leave": "Quitter",
     "stay": "Rester"
+  },
+  "placeholders": {
+    "product": "Choisir un produit"
   }
 }

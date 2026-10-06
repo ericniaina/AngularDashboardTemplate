@@ -16,12 +16,14 @@
 </app-page-header>
 
 <app-data-table
-  [rowData]="store.loaded() ? store.countries() : null"
-  [columnDefs]="columnDefs()"
-  [getRowId]="getRowId"
+  [label]="'countries.title' | transloco"
+  [rows]="store.loaded() ? store.countries() : null"
+  [columns]="columns()"
+  [rowId]="rowId"
+  [actions]="rowActions()"
   [externalFilter]="externalFilter()"
   [loading]="store.loading()"
-  (rowDoubleClicked)="openDialog($event)"
+  (rowActivate)="openDialog($event)"
 >
   <button
     tableActions

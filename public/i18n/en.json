@@ -52,7 +52,22 @@
       "light": "Switch to light theme"
     },
     "table": {
-      "search": "Search all columns…"
+      "search": "Search all columns…",
+      "all": "All",
+      "selectAll": "Select all rows",
+      "selectRow": "Select row",
+      "filterColumn": "Filter {{column}}",
+      "loading": "Loading…",
+      "noRows": "Nothing here yet.",
+      "noMatches": "No rows match the current filters.",
+      "clearFilters": "Clear filters",
+      "rowsPerPage": "Rows per page",
+      "range": "{{from}}–{{to}} of {{total}}",
+      "pageOf": "Page {{page}} of {{count}}",
+      "firstPage": "First page",
+      "previousPage": "Previous page",
+      "nextPage": "Next page",
+      "lastPage": "Last page"
     },
     "date": {
       "placeholder": "mm/dd/yyyy",
