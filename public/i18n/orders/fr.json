@@ -25,5 +25,16 @@
   },
   "placeholders": {
     "product": "Choisir un produit"
+  },
+  "import": {
+    "button": "Importer un CSV",
+    "sample": "Exemple CSV",
+    "imported": "{count} ligne(s) importée(s). Vérifiez-les, puis enregistrez.",
+    "importedWithIssues": "{count} ligne(s) importée(s), dont {invalid} à corriger (en surbrillance). Corrigez-les, puis enregistrez.",
+    "importEmpty": "Le fichier ne contient aucune ligne à importer.",
+    "importMissingColumns": "Colonne(s) manquante(s) : {columns}. La première ligne doit nommer les colonnes, par ex. product;quantity;unitPrice.",
+    "importTooManyRows": "Trop de lignes : {max} au maximum par fichier.",
+    "importTooLarge": "Le fichier est trop volumineux (1 Mo maximum).",
+    "importFailed": "Le fichier n'a pas pu être lu."
   }
 }

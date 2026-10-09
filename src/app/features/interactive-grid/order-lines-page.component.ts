@@ -11,11 +11,13 @@ import {
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   lucideCopy,
+  lucideDownload,
   lucidePlus,
   lucideSave,
   lucideTrash2,
   lucideTriangleAlert,
   lucideUndo2,
+  lucideUpload,
 } from '@ng-icons/lucide';
 import { toast } from '@spartan-ng/brain/sonner';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
@@ -30,10 +32,13 @@ import { DataTableComponent } from '../../shared/components/data-table/data-tabl
 import type { DataTableColumn } from '../../shared/components/data-table/data-table.model';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { type EditableField, lineAmount, type OrderLine } from './order-line.model';
+import { readOrderLinesCsv, SAMPLE_CSV } from './order-lines-csv';
 import { OrderLinesStore } from './order-lines.store';
 import type { HasUnsavedChanges } from './unsaved-changes.guard';
 
 const CURRENCY = 'EUR';
+/** CSV imports above this size are refused before being read. */
+const MAX_IMPORT_BYTES = 1024 * 1024;
 
 /**
  * Editable lines: the cells are form controls bound to the store. The table only renders
@@ -56,11 +61,13 @@ const CURRENCY = 'EUR';
     OrderLinesStore,
     provideIcons({
       lucideCopy,
+      lucideDownload,
       lucidePlus,
       lucideSave,
       lucideTrash2,
       lucideTriangleAlert,
       lucideUndo2,
+      lucideUpload,
     }),
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -79,6 +86,16 @@ export class OrderLinesPageComponent implements HasUnsavedChanges {
   private readonly text = translateGroup<
     'saved' | 'saveFailed' | 'leaveTitle' | 'leaveMessage' | 'leave' | 'stay' | 'invalidLines'
   >('orders.messages');
+
+  private readonly importText = translateGroup<
+    | 'imported'
+    | 'importedWithIssues'
+    | 'importEmpty'
+    | 'importMissingColumns'
+    | 'importTooManyRows'
+    | 'importTooLarge'
+    | 'importFailed'
+  >('orders.import');
 
   protected readonly selectedIds = signal<readonly string[]>([]);
 
@@ -173,6 +190,68 @@ export class OrderLinesPageComponent implements HasUnsavedChanges {
       },
       { injector: this.injector },
     );
+  }
+
+  /**
+   * CSV import, entirely in the browser: the file is read and parsed here and each row becomes a
+   * new line through the store, exactly like "Add line" with values. Nothing is sent to the server;
+   * the lines join the unsaved changes and go out with the page's single "Save".
+   */
+  protected async importCsv(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = ''; // so choosing the same file again still triggers (change)
+    if (!file) return;
+
+    const text = this.importText();
+    if (file.size > MAX_IMPORT_BYTES) {
+      toast.error(text.importTooLarge);
+      return;
+    }
+    let content: string;
+    try {
+      content = await file.text();
+    } catch {
+      toast.error(text.importFailed);
+      return;
+    }
+
+    const result = readOrderLinesCsv(content, this.store.products());
+    if (!result.ok) {
+      if (result.error === 'empty') toast.error(text.importEmpty);
+      else if (result.error === 'tooManyRows')
+        toast.error(interpolate(text.importTooManyRows, { max: result.max }));
+      else
+        toast.error(interpolate(text.importMissingColumns, { columns: result.missing.join(', ') }));
+      return;
+    }
+
+    const ids = this.store.addLines(result.lines);
+    const errors = this.store.errorsById();
+    const invalid = ids.filter((id) => (errors.get(id)?.size ?? 0) > 0).length;
+    if (invalid > 0) {
+      toast.warning(interpolate(text.importedWithIssues, { count: ids.length, invalid }));
+    } else {
+      toast.success(interpolate(text.imported, { count: ids.length }));
+    }
+    // Bring the first imported line into view.
+    afterNextRender(
+      () =>
+        document
+          .getElementById(`order-line-product-${ids[0]}`)
+          ?.scrollIntoView({ block: 'nearest' }),
+      { injector: this.injector },
+    );
+  }
+
+  /** The expected format, generated in memory (no file on the server). */
+  protected downloadSample(): void {
+    const url = URL.createObjectURL(new Blob([SAMPLE_CSV], { type: 'text/csv;charset=utf-8' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'order-lines-sample.csv';
+    link.click();
+    URL.revokeObjectURL(url);
   }
 
   protected duplicate(): void {

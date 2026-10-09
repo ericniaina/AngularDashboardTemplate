@@ -332,7 +332,17 @@ api.get('/admin/users', requireRoles('Admin'), (_req, res) => res.json(USERS));
 
 app.use('/api', api);
 
-app.listen(PORT, () => {
+// Express 5 hands listen errors to this callback; without the check, a busy port would still log
+// "mock BFF on …" and then exit silently, leaving another (stale) BFF answering on that port.
+app.listen(PORT, (error) => {
+  if (error) {
+    console.error(
+      error.code === 'EADDRINUSE'
+        ? `mock BFF: port ${PORT} is already in use (another BFF still running?). Stop it or set PORT.`
+        : `mock BFF: could not start: ${error.message}`,
+    );
+    process.exit(1);
+  }
   console.log(
     `mock BFF on http://localhost:${PORT} (access ${ACCESS_TTL_MS} ms, refresh ${REFRESH_TTL_MS} ms, latency ${LATENCY_MS} ms)`,
   );

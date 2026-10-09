@@ -15,8 +15,9 @@ import {
 } from './order-line.model';
 
 /**
- * The source of truth for the editable grid. The grid runs with `readOnlyEdit` and only renders
- * `lines()`; every edit comes here and produces a new array. Nothing is sent until `save()`.
+ * The source of truth for the editable table. The table only renders `lines()`; every edit, add,
+ * duplicate, removal or CSV import comes here and produces a new array. Nothing is sent until
+ * `save()`.
  */
 @Injectable()
 export class OrderLinesStore {
@@ -66,6 +67,13 @@ export class OrderLinesStore {
     const line = blankLine(newLineId());
     this._lines.update((lines) => [...lines, line]);
     return line.id;
+  }
+
+  /** Appends lines with the given values (e.g. from a CSV import) and returns their new ids. */
+  addLines(values: readonly Omit<OrderLine, 'id'>[]): string[] {
+    const added = values.map((v) => ({ id: newLineId(), ...v }));
+    this._lines.update((lines) => [...lines, ...added]);
+    return added.map((line) => line.id);
   }
 
   duplicate(ids: readonly string[]): void {

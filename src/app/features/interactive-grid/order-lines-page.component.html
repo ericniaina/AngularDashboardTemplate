@@ -37,6 +37,21 @@
       <ng-icon name="lucidePlus" />
       {{ 'orders.actions.add' | transloco }}
     </button>
+    <input #csvInput type="file" accept=".csv,text/csv" hidden (change)="importCsv($event)" />
+    <button
+      hlmBtn
+      variant="outline"
+      type="button"
+      [disabled]="store.loading()"
+      (click)="csvInput.click()"
+    >
+      <ng-icon name="lucideUpload" />
+      {{ 'orders.import.button' | transloco }}
+    </button>
+    <button hlmBtn variant="ghost" type="button" (click)="downloadSample()">
+      <ng-icon name="lucideDownload" />
+      {{ 'orders.import.sample' | transloco }}
+    </button>
     <button
       hlmBtn
       variant="outline"
