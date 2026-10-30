@@ -92,9 +92,10 @@ export class EmployeesPageComponent {
       {
         id: 'hireDate',
         header: text.hireDate,
-        // Sorts on the raw ISO value; shown (and text-filtered) localized.
+        // Sorts and date-filters on the raw ISO value; shown (and searched) localized.
         value: (e) => e.hireDate,
         display: (e) => formatLocalizedDate(e.hireDate, locale, 'mediumDate'),
+        filter: { type: 'date' },
         cellClass: 'w-40',
       },
     ];

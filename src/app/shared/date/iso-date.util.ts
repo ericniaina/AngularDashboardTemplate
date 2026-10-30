@@ -21,6 +21,17 @@ export function isIsoDate(value: unknown): value is string {
   return typeof value === 'string' && fromIsoDate(value) !== null;
 }
 
+/**
+ * The local calendar date (`yyyy-MM-dd`) of an ISO date or timestamp, i.e. the day the user sees
+ * displayed (`2026-01-15T23:30:00Z` is the 16th east of Greenwich). `null` if unparseable.
+ */
+export function toLocalIsoDate(value: string | null | undefined): string | null {
+  if (!value) return null;
+  if (isIsoDate(value)) return value;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : toIsoDate(date);
+}
+
 export function todayIso(): string {
   return toIsoDate(new Date());
 }

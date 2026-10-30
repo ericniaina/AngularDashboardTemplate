@@ -1,4 +1,4 @@
-import { calendarDate, fromIsoDate, isIsoDate, toIsoDate } from './iso-date.util';
+import { calendarDate, fromIsoDate, isIsoDate, toIsoDate, toLocalIsoDate } from './iso-date.util';
 
 // Assertions use calendar fields, never toISOString(), so they hold in every timezone.
 describe('iso-date.util', () => {
@@ -27,6 +27,15 @@ describe('iso-date.util', () => {
     expect(fromIsoDate(null)).toBeNull();
     expect(isIsoDate('2023-02-29')).toBe(false);
     expect(isIsoDate('2024-02-29')).toBe(true);
+  });
+
+  it('gives the local calendar date of a timestamp, and passes ISO dates through', () => {
+    const lateEvening = new Date(2026, 0, 15, 23, 30);
+    // As UTC this may already be the 16th (or still the 15th); the local day is what users see.
+    expect(toLocalIsoDate(lateEvening.toISOString())).toBe('2026-01-15');
+    expect(toLocalIsoDate('2026-01-15')).toBe('2026-01-15');
+    expect(toLocalIsoDate('not a date')).toBeNull();
+    expect(toLocalIsoDate('')).toBeNull();
   });
 
   it('keeps years below 100 as-is', () => {

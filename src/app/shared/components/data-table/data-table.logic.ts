@@ -1,6 +1,13 @@
 // The table's data pipeline as pure functions: filter → sort → paginate. Unit-tested; the
 // component only wires these to signals.
-import type { CellValue, DataTableColumn, SortState } from './data-table.model';
+import { toLocalIsoDate } from '../../date/iso-date.util';
+import type {
+  CellValue,
+  ColumnFilterValue,
+  DataTableColumn,
+  DateFilterValue,
+  SortState,
+} from './data-table.model';
 
 /** Case- and accent-insensitive, so "asie" matches "Asie" and "etats" matches "États". */
 export function normalizeText(text: string): string {
@@ -20,8 +27,8 @@ export function displayText<T>(column: DataTableColumn<T>, row: T): string {
 export interface FilterState<T> {
   /** Global search across every column's displayed text. */
   search: string;
-  /** Column id → text (text filter) or option value (select filter); '' = no filter. */
-  columnFilters: Record<string, string>;
+  /** Column id → filter value; '' or absent = no filter. */
+  columnFilters: Record<string, ColumnFilterValue>;
   /** Extra predicate (the "advanced filter"); `null` = none. */
   external: ((row: T) => boolean) | null;
 }
@@ -41,12 +48,30 @@ export function filterRows<T>(
     if (search && !columns.some((c) => normalizeText(displayText(c, row)).includes(search))) {
       return false;
     }
-    return active.every(({ column, needle }) =>
-      column.filter && column.filter.type === 'select'
+    return active.every(({ column, needle }) => {
+      if (typeof needle !== 'string') return matchesDate(column.value(row), needle);
+      return column.filter && column.filter.type === 'select'
         ? String(column.value(row) ?? '') === needle
-        : normalizeText(displayText(column, row)).includes(normalizeText(needle)),
-    );
+        : normalizeText(displayText(column, row)).includes(normalizeText(needle));
+    });
   });
+}
+
+/**
+ * Compares the local calendar date of an ISO date or timestamp, the day users see displayed (ISO
+ * dates compare correctly as plain strings). An empty or unparseable value never matches.
+ */
+export function matchesDate(value: CellValue, filter: DateFilterValue): boolean {
+  const date = typeof value === 'string' ? toLocalIsoDate(value) : null;
+  if (!date) return false;
+  switch (filter.operator) {
+    case 'on':
+      return date === filter.date;
+    case 'before':
+      return date < filter.date;
+    case 'after':
+      return date > filter.date;
+  }
 }
 
 /** Nulls last; numbers numerically; strings with the locale's collation (numeric-aware). */

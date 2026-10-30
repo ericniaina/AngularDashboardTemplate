@@ -101,9 +101,9 @@ Suggested entity: **Countries** (or similar simple flat reference data — code,
 
 - Route: `/referential`.
 - `<app-data-table>` listing all records:
-  - Sortable columns; a filter row with a text box for code and name, and dropdowns for region and status.
+  - Sortable columns; a filter row with a text box for code and name, dropdowns for region and status, and a date filter (on / before / after) for "Last updated" (a timestamp, compared on its local day).
   - A global search bar above the table that filters across all columns at once — on the displayed (translated) values, accent- and case-insensitive (typing "asie" finds Asian countries in French).
-  - An "Advanced filter" panel (outline toggle button with an active-filter count badge; the panel is a collapsible card between the toolbar and the grid, with its fields in a responsive grid): name contains, region multi-select (`hlm-select` multiple), active/inactive/all (radio group). Implemented through the table's `externalFilter` input, combined with the column filters and the search. "Reset" clears it.
+  - An "Advanced filter" panel (outline toggle button with an active-filter count badge; the panel is a collapsible card between the toolbar and the grid, with its fields in a responsive grid): name contains, region multi-select (`hlm-select` multiple), active/inactive/all (radio group), and an "Updated from / to" date range (two `<app-date-field>`s, both ends inclusive and optional, counted as one criterion; a "to" before "from" shows an error under "Updated to"). Implemented through the table's `externalFilter` input, combined with the column filters and the search. "Reset" clears it.
 - Create / Edit via an `hlm-dialog` with a reactive form (validators: required, 2–3 letter code, max length, unique code checked against the loaded dataset). The BFF also rejects duplicates (409 → error shown on the code field). Save/delete outcomes are confirmed with a toast.
 - Dialog layout (reference for every CRUD dialog): title "New country" / "Edit country" + description; row 1 = Code (narrow) and Name in a `sm:grid-cols-2` grid; row 2 = Region, full width; row 3 = "Active" switch as a horizontal field with a description ("Inactive countries are hidden from pickers"); footer = Cancel (outline) + Save.
 - Delete with a confirm dialog (`shared/components/confirm-dialog`).
@@ -116,6 +116,7 @@ Suggested entity: **Employees**, referencing **Department** (from a small lookup
 
 - Route: `/employees`.
 - Grid shows a `department` column displaying the department's *name*, not its id — resolved into the row model (`departmentName`) from the department lookup, not a per-row HTTP call, so sorting and filtering work on the name.
+- The hire date column has a date filter (`{ type: 'date' }`): a button in the filter row opens a popover with a condition (on / before / after) and an `<app-date-field>`, compared on the raw ISO value.
 - The department lookup is `shared/lookups/departments.service.ts` (`httpResource`, loaded once, shared with the onboarding wizard).
 - Create/Edit form: department picked via `hlm-select` sourced from the lookup; hire date via `<app-date-field>`. Layout: first + last name paired, then email, then department + hire date paired.
 - Demonstrates: loading a lookup once (shared signal/service), resolving ids → display values in a grid, and validating a required foreign key in the form.

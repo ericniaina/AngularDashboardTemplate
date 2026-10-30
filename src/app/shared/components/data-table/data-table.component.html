@@ -138,7 +138,7 @@
               'common.table.filterColumn' | transloco: { column: column.header }
             }}</label>
             <hlm-select
-              [value]="columnFilters()[column.id] ?? ''"
+              [value]="textFilter(column.id)"
               (valueChange)="setColumnFilter(column.id, $any($event) ?? '')"
               [itemToString]="filterLabels().get(column.id)!"
             >
@@ -158,12 +158,18 @@
                 }
               </hlm-select-content>
             </hlm-select>
+          } @else if (column.filter?.type === 'date') {
+            <app-date-filter
+              [value]="dateFilter(column.id)"
+              (valueChange)="setColumnFilter(column.id, $event ?? '')"
+              [label]="'common.table.filterColumn' | transloco: { column: column.header }"
+            />
           } @else {
             <input
               hlmInput
               type="search"
               class="h-8 min-w-24 font-normal"
-              [value]="columnFilters()[column.id] ?? ''"
+              [value]="textFilter(column.id)"
               (input)="setColumnFilter(column.id, $any($event.target).value)"
               [attr.aria-label]="'common.table.filterColumn' | transloco: { column: column.header }"
             />

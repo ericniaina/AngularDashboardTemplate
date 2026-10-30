@@ -95,6 +95,31 @@
             }
           </hlm-radio-group>
         </fieldset>
+
+        <div hlmField>
+          <label hlmFieldLabel for="filter-updated-from">{{
+            'countries.filter.updatedFrom' | transloco
+          }}</label>
+          <app-date-field formControlName="updatedFrom" inputId="filter-updated-from" />
+          <hlm-field-error validator="invalidDate">{{
+            'common.validation.invalidDate' | transloco
+          }}</hlm-field-error>
+        </div>
+
+        <div hlmField>
+          <label hlmFieldLabel for="filter-updated-to">{{
+            'countries.filter.updatedTo' | transloco
+          }}</label>
+          <app-date-field formControlName="updatedTo" inputId="filter-updated-to" />
+          <hlm-field-error validator="invalidDate">{{
+            'common.validation.invalidDate' | transloco
+          }}</hlm-field-error>
+          @if (rangeInverted()) {
+            <hlm-field-error forceShow>{{
+              'countries.filter.rangeInverted' | transloco
+            }}</hlm-field-error>
+          }
+        </div>
       </div>
       <div hlmCardFooter class="justify-end">
         <button

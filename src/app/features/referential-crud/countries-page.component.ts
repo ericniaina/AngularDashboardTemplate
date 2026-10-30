@@ -15,13 +15,16 @@ import { HlmRadioGroupImports } from '@spartan-ng/helm/radio-group';
 import { HlmSelectImports } from '@spartan-ng/helm/select';
 import { ACCESS, AuthService } from '../../core/auth';
 import { interpolate, translateGroup, TranslocoPipe } from '../../core/i18n';
+import { LocaleService } from '../../core/locale';
 import { ConfirmDialogService } from '../../shared/components/confirm-dialog';
 import { DataTableComponent } from '../../shared/components/data-table/data-table.component';
 import type {
   DataTableColumn,
   RowAction,
 } from '../../shared/components/data-table/data-table.model';
+import { DateFieldComponent } from '../../shared/components/date-field/date-field.component';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
+import { formatLocalizedDate } from '../../shared/date/date-format.util';
 import { CountriesStore } from './countries.store';
 import {
   CountryDialogComponent,
@@ -42,6 +45,7 @@ import {
   selector: 'app-countries-page',
   imports: [
     DataTableComponent,
+    DateFieldComponent,
     HlmBadgeImports,
     HlmButtonImports,
     HlmCardImports,
@@ -68,10 +72,11 @@ export class CountriesPageComponent {
   private readonly dialog = inject(HlmDialogService);
   private readonly confirm = inject(ConfirmDialogService);
   private readonly fb = inject(FormBuilder);
+  private readonly locale = inject(LocaleService).locale;
 
   protected readonly canWrite = computed(() => this.auth.hasAnyRole(ACCESS.referentialWrite));
 
-  private readonly columnText = translateGroup<'code' | 'name' | 'region' | 'status'>(
+  private readonly columnText = translateGroup<'code' | 'name' | 'region' | 'status' | 'updatedAt'>(
     'countries.columns',
   );
   private readonly statusText = translateGroup<'active' | 'inactive'>('common.status');
@@ -91,11 +96,13 @@ export class CountriesPageComponent {
     nameContains: '',
     regions: this.fb.nonNullable.control<Region[]>([]),
     status: this.fb.nonNullable.control<StatusFilter>('all'),
+    updatedFrom: this.fb.nonNullable.control<string | null>(null),
+    updatedTo: this.fb.nonNullable.control<string | null>(null),
   });
   private readonly filter = toSignal(this.filterForm.valueChanges, {
     initialValue: EMPTY_COUNTRY_FILTER as Partial<CountryFilter>,
   });
-  private readonly effectiveFilter = computed<CountryFilter>(() => ({
+  protected readonly effectiveFilter = computed<CountryFilter>(() => ({
     ...EMPTY_COUNTRY_FILTER,
     ...this.filter(),
   }));
@@ -105,12 +112,18 @@ export class CountriesPageComponent {
   protected readonly externalFilter = computed(() =>
     countryFilterPredicate(this.effectiveFilter()),
   );
+  /** "To" before "From": nothing can match, so say why instead of showing an unexplained empty table. */
+  protected readonly rangeInverted = computed(() => {
+    const { updatedFrom: from, updatedTo: to } = this.effectiveFilter();
+    return !!from && !!to && from > to;
+  });
   protected readonly regionLabel = (region: Region) => this.regionText()[region];
 
   protected readonly columns = computed<DataTableColumn<Country>[]>(() => {
     const text = this.columnText();
     const regions = this.regionText();
     const status = this.statusText();
+    const locale = this.locale();
     const statusLabel = (active: boolean) => (active ? status.active : status.inactive);
     return [
       { id: 'code', header: text.code, value: (c) => c.code, cellClass: 'w-28' },
@@ -135,6 +148,15 @@ export class CountriesPageComponent {
             { value: 'inactive', label: status.inactive },
           ],
         },
+        cellClass: 'w-40',
+      },
+      {
+        id: 'updatedAt',
+        header: text.updatedAt,
+        // A timestamp: sorts as ISO text, shown as a localized date, date-filtered on its local day.
+        value: (c) => c.updatedAt,
+        display: (c) => formatLocalizedDate(c.updatedAt, locale, 'mediumDate'),
+        filter: { type: 'date' },
         cellClass: 'w-40',
       },
     ];

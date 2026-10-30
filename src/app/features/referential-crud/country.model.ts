@@ -1,3 +1,5 @@
+import { toLocalIsoDate } from '../../shared/date/iso-date.util';
+
 export const REGIONS = ['africa', 'americas', 'asia', 'europe', 'oceania'] as const;
 export type Region = (typeof REGIONS)[number];
 
@@ -19,9 +21,18 @@ export interface CountryFilter {
   nameContains: string;
   regions: Region[];
   status: StatusFilter;
+  /** "Updated between": ISO dates, both inclusive; `null` = open-ended. */
+  updatedFrom: string | null;
+  updatedTo: string | null;
 }
 
-export const EMPTY_COUNTRY_FILTER: CountryFilter = { nameContains: '', regions: [], status: 'all' };
+export const EMPTY_COUNTRY_FILTER: CountryFilter = {
+  nameContains: '',
+  regions: [],
+  status: 'all',
+  updatedFrom: null,
+  updatedTo: null,
+};
 
 /** Number of criteria that actually filter something (for the toggle's badge). */
 export function activeCriteriaCount(filter: CountryFilter): number {
@@ -29,6 +40,8 @@ export function activeCriteriaCount(filter: CountryFilter): number {
     filter.nameContains.trim() !== '',
     filter.regions.length > 0,
     filter.status !== 'all',
+    // The date range counts once, whichever ends are set.
+    !!filter.updatedFrom || !!filter.updatedTo,
   ].filter(Boolean).length;
 }
 
@@ -38,8 +51,16 @@ export function countryFilterPredicate(
 ): ((country: Country) => boolean) | null {
   if (activeCriteriaCount(filter) === 0) return null;
   const needle = filter.nameContains.trim().toLocaleLowerCase();
-  return (country) =>
-    (!needle || country.name.toLocaleLowerCase().includes(needle)) &&
-    (filter.regions.length === 0 || filter.regions.includes(country.region)) &&
-    (filter.status === 'all' || country.active === (filter.status === 'active'));
+  const { updatedFrom: from, updatedTo: to } = filter;
+  return (country) => {
+    // `updatedAt` is a timestamp; compare the day users see, as ISO strings.
+    const updated = toLocalIsoDate(country.updatedAt);
+    return (
+      (!needle || country.name.toLocaleLowerCase().includes(needle)) &&
+      (filter.regions.length === 0 || filter.regions.includes(country.region)) &&
+      (filter.status === 'all' || country.active === (filter.status === 'active')) &&
+      (!from || (!!updated && updated >= from)) &&
+      (!to || (!!updated && updated <= to))
+    );
+  };
 }

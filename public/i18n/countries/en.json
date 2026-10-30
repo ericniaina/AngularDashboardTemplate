@@ -8,14 +8,18 @@
     "code": "Code",
     "name": "Name",
     "region": "Region",
-    "status": "Status"
+    "status": "Status",
+    "updatedAt": "Last updated"
   },
   "filter": {
     "toggle": "Advanced filter",
     "nameContains": "Name contains",
     "regions": "Regions",
     "anyRegion": "Any region",
-    "status": "Status"
+    "status": "Status",
+    "updatedFrom": "Updated from",
+    "updatedTo": "Updated to",
+    "rangeInverted": "Must be on or after the “Updated from” date."
   },
   "dialog": {
     "newTitle": "New country",

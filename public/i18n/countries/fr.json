@@ -8,14 +8,18 @@
     "code": "Code",
     "name": "Nom",
     "region": "Région",
-    "status": "Statut"
+    "status": "Statut",
+    "updatedAt": "Mis à jour le"
   },
   "filter": {
     "toggle": "Filtre avancé",
     "nameContains": "Le nom contient",
     "regions": "Régions",
     "anyRegion": "Toutes les régions",
-    "status": "Statut"
+    "status": "Statut",
+    "updatedFrom": "Mis à jour du",
+    "updatedTo": "Mis à jour au",
+    "rangeInverted": "Doit être identique ou postérieure à la date « Mis à jour du »."
   },
   "dialog": {
     "newTitle": "Nouveau pays",

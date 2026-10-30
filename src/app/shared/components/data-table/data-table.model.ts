@@ -8,7 +8,22 @@ export interface SelectFilterOption {
   label: string;
 }
 
-export type ColumnFilter = { type: 'text' } | { type: 'select'; options: SelectFilterOption[] };
+export type ColumnFilter =
+  | { type: 'text' }
+  | { type: 'select'; options: SelectFilterOption[] }
+  /** On the raw value, an ISO date (`yyyy-MM-dd`) or timestamp (compared on its local day). */
+  | { type: 'date' };
+
+export type DateOperator = 'on' | 'before' | 'after';
+
+export interface DateFilterValue {
+  operator: DateOperator;
+  /** ISO `yyyy-MM-dd`. */
+  date: string;
+}
+
+/** Text filter: the typed text; select: the option value; date: operator + date. `''` = no filter. */
+export type ColumnFilterValue = string | DateFilterValue;
 
 /**
  * A column of `<app-data-table>`. Features describe columns with this library-neutral shape;

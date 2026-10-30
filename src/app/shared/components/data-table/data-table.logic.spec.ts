@@ -1,6 +1,7 @@
 import {
   compareValues,
   filterRows,
+  matchesDate,
   nextSort,
   normalizeText,
   paginate,
@@ -69,6 +70,25 @@ describe('data table logic', () => {
         external: (r) => r.amount === 2,
       });
       expect(ids(result)).toEqual(['2', '4']);
+    });
+
+    it('filters a date column on its raw ISO value: on, before, after (strict)', () => {
+      const dateFilter = (operator: 'on' | 'before' | 'after', date: string) =>
+        ids(
+          filterRows(rows, columns, { ...noFilter, columnFilters: { date: { operator, date } } }),
+        );
+      expect(dateFilter('on', '2024-01-15')).toEqual(['3']);
+      expect(dateFilter('before', '2024-01-15')).toEqual(['2', '4']);
+      expect(dateFilter('after', '2024-01-15')).toEqual(['1']);
+      expect(dateFilter('after', '2025-01-01')).toEqual([]);
+    });
+  });
+
+  describe('matchesDate', () => {
+    it('compares the date part of a timestamp and never matches an empty value', () => {
+      expect(matchesDate('2024-01-15T23:30:00', { operator: 'on', date: '2024-01-15' })).toBe(true);
+      expect(matchesDate('', { operator: 'before', date: '2024-01-15' })).toBe(false);
+      expect(matchesDate(null, { operator: 'after', date: '2024-01-15' })).toBe(false);
     });
   });
 

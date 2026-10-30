@@ -42,7 +42,14 @@ import { translateGroup, TranslocoPipe } from '../../../core/i18n';
 import { LocaleService } from '../../../core/locale';
 import { type DataTableCellContext, DataTableCellDirective } from './data-table-cell.directive';
 import { displayText, filterRows, nextSort, paginate, sortRows } from './data-table.logic';
-import type { DataTableColumn, RowAction, SortState } from './data-table.model';
+import type {
+  ColumnFilterValue,
+  DataTableColumn,
+  DateFilterValue,
+  RowAction,
+  SortState,
+} from './data-table.model';
+import { DateFilterComponent } from './date-filter/date-filter.component';
 
 const SELECT_COLUMN = '__select';
 const ACTIONS_COLUMN = '__actions';
@@ -58,6 +65,7 @@ let nextId = 0;
   selector: 'app-data-table',
   imports: [
     CdkTableModule,
+    DateFilterComponent,
     HlmButtonImports,
     HlmCheckboxImports,
     HlmDropdownMenuImports,
@@ -129,7 +137,7 @@ export class DataTableComponent<T> {
 
   // State
   protected readonly searchText = signal('');
-  protected readonly columnFilters = signal<Record<string, string>>({});
+  protected readonly columnFilters = signal<Record<string, ColumnFilterValue>>({});
   protected readonly sort = signal<SortState | null>(null);
   protected readonly pageSize = linkedSignal(() => this.pageSizes()[0] ?? 10);
   /** Back to the first page whenever what's shown changes. */
@@ -243,8 +251,18 @@ export class DataTableComponent<T> {
     return sort.direction === 'asc' ? 'ascending' : 'descending';
   }
 
-  protected setColumnFilter(columnId: string, value: string): void {
+  protected setColumnFilter(columnId: string, value: ColumnFilterValue): void {
     this.columnFilters.update((filters) => ({ ...filters, [columnId]: value }));
+  }
+
+  protected textFilter(columnId: string): string {
+    const value = this.columnFilters()[columnId];
+    return typeof value === 'string' ? value : '';
+  }
+
+  protected dateFilter(columnId: string): DateFilterValue | null {
+    const value = this.columnFilters()[columnId];
+    return typeof value === 'object' ? value : null;
   }
 
   protected clearFilters(): void {

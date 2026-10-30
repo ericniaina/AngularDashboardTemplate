@@ -22,7 +22,12 @@ describe('advanced country filter', () => {
   });
 
   it('combines name, regions and status', () => {
-    const filter = { nameContains: 'an', regions: ['europe' as const], status: 'active' as const };
+    const filter = {
+      ...EMPTY_COUNTRY_FILTER,
+      nameContains: 'an',
+      regions: ['europe' as const],
+      status: 'active' as const,
+    };
     const pass = countryFilterPredicate(filter)!;
     expect(activeCriteriaCount(filter)).toBe(3);
     expect(pass(country({}))).toBe(true);
@@ -34,5 +39,22 @@ describe('advanced country filter', () => {
   it('matches names case-insensitively', () => {
     const pass = countryFilterPredicate({ ...EMPTY_COUNTRY_FILTER, nameContains: 'FRA' })!;
     expect(pass(country({}))).toBe(true);
+  });
+
+  it('filters on an inclusive "updated" date range, counted as one criterion', () => {
+    // Local timestamps, so the day is the same in every timezone.
+    const updatedOn = (day: number) =>
+      country({ updatedAt: new Date(2026, 0, day, 23, 30).toISOString() });
+    const range = { ...EMPTY_COUNTRY_FILTER, updatedFrom: '2026-01-10', updatedTo: '2026-01-20' };
+    const pass = countryFilterPredicate(range)!;
+    expect(activeCriteriaCount(range)).toBe(1);
+    expect([9, 10, 20, 21].map((day) => pass(updatedOn(day)))).toEqual([false, true, true, false]);
+
+    const fromOnly = countryFilterPredicate({
+      ...EMPTY_COUNTRY_FILTER,
+      updatedFrom: '2026-01-10',
+    })!;
+    expect(fromOnly(updatedOn(31))).toBe(true);
+    expect(fromOnly(country({ updatedAt: '' }))).toBe(false);
   });
 });

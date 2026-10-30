@@ -67,7 +67,15 @@
       "firstPage": "Première page",
       "previousPage": "Page précédente",
       "nextPage": "Page suivante",
-      "lastPage": "Dernière page"
+      "lastPage": "Dernière page",
+      "dateFilter": {
+        "any": "Toutes les dates",
+        "condition": "Condition",
+        "date": "Date",
+        "on": "Le",
+        "before": "Avant le",
+        "after": "Après le"
+      }
     },
     "date": {
       "placeholder": "jj/mm/aaaa",
