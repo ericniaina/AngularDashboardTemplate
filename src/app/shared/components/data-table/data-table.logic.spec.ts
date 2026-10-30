@@ -5,7 +5,9 @@ import {
   nextSort,
   normalizeText,
   paginate,
+  parseHiddenColumns,
   sortRows,
+  visibleColumns,
 } from './data-table.logic';
 import type { DataTableColumn } from './data-table.model';
 
@@ -81,6 +83,30 @@ describe('data table logic', () => {
       expect(dateFilter('before', '2024-01-15')).toEqual(['2', '4']);
       expect(dateFilter('after', '2024-01-15')).toEqual(['1']);
       expect(dateFilter('after', '2025-01-01')).toEqual([]);
+    });
+  });
+
+  describe('column visibility', () => {
+    const visibleIds = (hidden: string[], cols = columns) =>
+      visibleColumns(cols, hidden).map((c) => c.id);
+
+    it('hides by id, ignoring unknown ids', () => {
+      expect(visibleIds(['region', 'gone'])).toEqual(['name', 'amount', 'date']);
+    });
+
+    it('never hides a non-hideable column, and never hides everything', () => {
+      const locked = columns.map((c) => (c.id === 'name' ? { ...c, hideable: false } : c));
+      expect(visibleIds(['name', 'region'], locked)).toEqual(['name', 'amount', 'date']);
+      expect(visibleIds(['name', 'region', 'amount', 'date'])).toEqual(columns.map((c) => c.id));
+    });
+
+    it('reads a stored choice only when it is an array of ids', () => {
+      expect(parseHiddenColumns('["email","region"]')).toEqual(['email', 'region']);
+      expect(parseHiddenColumns('[]')).toEqual([]);
+      expect(parseHiddenColumns(null)).toBeNull();
+      expect(parseHiddenColumns('{"email":true}')).toBeNull();
+      expect(parseHiddenColumns('[1,2]')).toBeNull();
+      expect(parseHiddenColumns('not json')).toBeNull();
     });
   });
 

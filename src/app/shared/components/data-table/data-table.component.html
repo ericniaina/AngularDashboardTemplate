@@ -1,26 +1,58 @@
-@if (search()) {
+@if (search() || columnPicker()) {
   <div class="flex flex-wrap items-center gap-2">
-    <div class="relative w-full sm:w-72">
-      <ng-icon
-        name="lucideSearch"
-        class="text-muted-foreground pointer-events-none absolute start-2.5 top-1/2 -translate-y-1/2"
-        aria-hidden="true"
-      />
-      <input
-        hlmInput
-        type="search"
-        class="ps-8"
-        [value]="searchText()"
-        (input)="searchText.set($any($event.target).value)"
-        [placeholder]="'common.table.search' | transloco"
-        [attr.aria-label]="'common.table.search' | transloco"
-      />
-    </div>
+    @if (search()) {
+      <div class="relative w-full sm:w-72">
+        <ng-icon
+          name="lucideSearch"
+          class="text-muted-foreground pointer-events-none absolute start-2.5 top-1/2 -translate-y-1/2"
+          aria-hidden="true"
+        />
+        <input
+          hlmInput
+          type="search"
+          class="ps-8"
+          [value]="searchText()"
+          (input)="searchText.set($any($event.target).value)"
+          [placeholder]="'common.table.search' | transloco"
+          [attr.aria-label]="'common.table.search' | transloco"
+        />
+      </div>
+    }
     <div class="ms-auto flex flex-wrap items-center gap-2">
+      @if (columnPicker()) {
+        <button
+          hlmBtn
+          variant="outline"
+          type="button"
+          [hlmDropdownMenuTrigger]="columnMenu"
+          align="end"
+        >
+          <ng-icon name="lucideColumns3" />
+          {{ 'common.table.columns' | transloco }}
+        </button>
+      }
       <ng-content select="[tableActions]" />
     </div>
   </div>
 }
+
+<!-- Column picker: checking keeps the menu open, so several columns can be toggled in a row. -->
+<ng-template #columnMenu>
+  <hlm-dropdown-menu class="w-56">
+    <hlm-dropdown-menu-label>{{ 'common.table.showColumns' | transloco }}</hlm-dropdown-menu-label>
+    @for (column of columns(); track column.id) {
+      <button
+        hlmDropdownMenuCheckbox
+        [checked]="isColumnVisible(column)"
+        [disabled]="!canToggleColumn(column)"
+        (triggered)="toggleColumn(column)"
+      >
+        <span class="truncate" [title]="column.header">{{ column.header }}</span>
+        <hlm-dropdown-menu-checkbox-indicator />
+      </button>
+    }
+  </hlm-dropdown-menu>
+</ng-template>
 
 <ng-content />
 

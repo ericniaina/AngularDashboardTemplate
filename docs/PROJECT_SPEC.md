@@ -116,6 +116,7 @@ Suggested entity: **Employees**, referencing **Department** (from a small lookup
 
 - Route: `/employees`.
 - Grid shows a `department` column displaying the department's *name*, not its id — resolved into the row model (`departmentName`) from the department lookup, not a per-row HTTP call, so sorting and filtering work on the name.
+- A "Columns" menu hides/shows columns: Last name is always shown, Email starts hidden, and the choice is remembered across reloads (`columnsStorageKey="employees"`).
 - The hire date column has a date filter (`{ type: 'date' }`): a button in the filter row opens a popover with a condition (on / before / after) and an `<app-date-field>`, compared on the raw ISO value.
 - The department lookup is `shared/lookups/departments.service.ts` (`httpResource`, loaded once, shared with the onboarding wizard).
 - Create/Edit form: department picked via `hlm-select` sourced from the lookup; hire date via `<app-date-field>`. Layout: first + last name paired, then email, then department + hire date paired.

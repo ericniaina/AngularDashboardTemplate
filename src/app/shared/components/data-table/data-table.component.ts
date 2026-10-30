@@ -22,6 +22,7 @@ import {
   lucideChevronsLeft,
   lucideChevronsRight,
   lucideChevronsUpDown,
+  lucideColumns3,
   lucideCopy,
   lucideEllipsis,
   lucideEye,
@@ -41,7 +42,15 @@ import { HlmTableImports } from '@spartan-ng/helm/table';
 import { translateGroup, TranslocoPipe } from '../../../core/i18n';
 import { LocaleService } from '../../../core/locale';
 import { type DataTableCellContext, DataTableCellDirective } from './data-table-cell.directive';
-import { displayText, filterRows, nextSort, paginate, sortRows } from './data-table.logic';
+import {
+  displayText,
+  filterRows,
+  nextSort,
+  paginate,
+  parseHiddenColumns,
+  sortRows,
+  visibleColumns,
+} from './data-table.logic';
 import type {
   ColumnFilterValue,
   DataTableColumn,
@@ -54,7 +63,17 @@ import { DateFilterComponent } from './date-filter/date-filter.component';
 const SELECT_COLUMN = '__select';
 const ACTIONS_COLUMN = '__actions';
 const filterColumnId = (id: string) => `__filter_${id}`;
+const hiddenColumnsKey = (key: string) => `app.table.${key}.hiddenColumns`;
 let nextId = 0;
+
+function readHiddenColumns(key: string | null): string[] | null {
+  if (!key) return null;
+  try {
+    return parseHiddenColumns(localStorage.getItem(hiddenColumnsKey(key)));
+  } catch {
+    return null; // storage unavailable: start from the column defaults
+  }
+}
 
 /**
  * The house table: Angular CDK table + spartan table styling, with sortable headers, a filter row,
@@ -86,6 +105,7 @@ let nextId = 0;
       lucideChevronsLeft,
       lucideChevronsRight,
       lucideChevronsUpDown,
+      lucideColumns3,
       lucideCopy,
       lucideEllipsis,
       lucideEye,
@@ -129,6 +149,13 @@ export class DataTableComponent<T> {
   readonly striped = input(false);
   /** Footer row: column id → text (e.g. totals). */
   readonly footer = input<Record<string, string> | null>(null);
+  /** "Columns" menu above the table to hide/show columns (see `hideable` / `hidden` on columns). */
+  readonly columnPicker = input(false);
+  /**
+   * Remembers the user's column choice across reloads, in localStorage under this key (unique per
+   * table, e.g. `'employees'`). `null` = not remembered: every visit starts from the defaults.
+   */
+  readonly columnsStorageKey = input<string | null>(null);
 
   /** Double-click on a row (open/edit). Keyboard users get the same through the row menu. */
   readonly rowActivate = output<T>();
@@ -152,19 +179,41 @@ export class DataTableComponent<T> {
     computation: () => 0,
   });
 
-  // Pipeline: filter → sort → paginate
+  // Column visibility
+  /**
+   * The definitions' default hidden ids, as a string: column arrays are rebuilt on every language
+   * change, and that must not reset the user's choice.
+   */
+  private readonly defaultHidden = computed(() =>
+    JSON.stringify(
+      this.columns()
+        .filter((c) => c.hidden)
+        .map((c) => c.id),
+    ),
+  );
+  protected readonly hiddenColumnIds = linkedSignal<readonly string[]>(
+    () =>
+      readHiddenColumns(this.columnsStorageKey()) ?? (JSON.parse(this.defaultHidden()) as string[]),
+  );
+  /** What is shown, searched, filtered and sorted. */
+  protected readonly visibleColumns = computed(() =>
+    visibleColumns(this.columns(), this.hiddenColumnIds()),
+  );
+  private readonly visibleIds = computed(() => new Set(this.visibleColumns().map((c) => c.id)));
+
+  // Pipeline: filter → sort → paginate (on visible columns: users search what they can see)
   private readonly collator = computed(
     () => new Intl.Collator(this.locale(), { numeric: true, sensitivity: 'base' }),
   );
   protected readonly filteredRows = computed(() =>
-    filterRows(this.rows() ?? [], this.columns(), {
+    filterRows(this.rows() ?? [], this.visibleColumns(), {
       search: this.searchText(),
       columnFilters: this.columnFilters(),
       external: this.externalFilter(),
     }),
   );
   private readonly sortedRows = computed(() =>
-    sortRows(this.filteredRows(), this.columns(), this.sort(), this.collator()),
+    sortRows(this.filteredRows(), this.visibleColumns(), this.sort(), this.collator()),
   );
   protected readonly page = computed(() =>
     this.pagination()
@@ -186,11 +235,11 @@ export class DataTableComponent<T> {
   protected readonly hasActions = computed(() => (this.actions()?.length ?? 0) > 0);
   protected readonly displayedColumns = computed(() => [
     ...(this.selectable() ? [SELECT_COLUMN] : []),
-    ...this.columns().map((c) => c.id),
+    ...this.visibleColumns().map((c) => c.id),
     ...(this.hasActions() ? [ACTIONS_COLUMN] : []),
   ]);
   protected readonly showFilterRow = computed(
-    () => this.filters() && this.columns().some((c) => c.filter !== false),
+    () => this.filters() && this.visibleColumns().some((c) => c.filter !== false),
   );
   protected readonly filterRowColumns = computed(() => this.displayedColumns().map(filterColumnId));
   protected readonly columnCount = computed(() => this.displayedColumns().length);
@@ -268,6 +317,39 @@ export class DataTableComponent<T> {
   protected clearFilters(): void {
     this.searchText.set('');
     this.columnFilters.set({});
+  }
+
+  protected isColumnVisible(column: DataTableColumn<T>): boolean {
+    return this.visibleIds().has(column.id);
+  }
+
+  /** Always-shown columns, and the last visible one, can't be unchecked. */
+  protected canToggleColumn(column: DataTableColumn<T>): boolean {
+    return (
+      column.hideable !== false &&
+      !(this.isColumnVisible(column) && this.visibleColumns().length === 1)
+    );
+  }
+
+  protected toggleColumn(column: DataTableColumn<T>): void {
+    const hide = this.isColumnVisible(column);
+    const ids = hide
+      ? [...this.hiddenColumnIds(), column.id]
+      : this.hiddenColumnIds().filter((id) => id !== column.id);
+    this.hiddenColumnIds.set(ids);
+    if (hide) {
+      // A hidden column must not keep filtering or ordering rows by values the user can't see.
+      if (this.columnFilters()[column.id]) this.setColumnFilter(column.id, '');
+      if (this.sort()?.columnId === column.id) this.sort.set(null);
+    }
+    const key = this.columnsStorageKey();
+    if (key) {
+      try {
+        localStorage.setItem(hiddenColumnsKey(key), JSON.stringify(ids));
+      } catch {
+        // storage unavailable: the choice just won't survive a reload
+      }
+    }
   }
 
   protected goTo(pageIndex: number): void {

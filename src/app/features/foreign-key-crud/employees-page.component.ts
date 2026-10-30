@@ -45,6 +45,8 @@ import { EmployeesStore } from './employees.store';
       [rowId]="rowId"
       [actions]="rowActions()"
       [loading]="!ready()"
+      [columnPicker]="true"
+      columnsStorageKey="employees"
       (rowActivate)="openDialog($event)"
     />
   `,
@@ -77,8 +79,10 @@ export class EmployeesPageComponent {
     const locale = this.locale();
     return [
       { id: 'firstName', header: text.firstName, value: (e) => e.firstName },
-      { id: 'lastName', header: text.lastName, value: (e) => e.lastName },
-      { id: 'email', header: text.email, value: (e) => e.email },
+      // Always shown, so a row can always be identified.
+      { id: 'lastName', header: text.lastName, value: (e) => e.lastName, hideable: false },
+      // Hidden by default; the "Columns" menu shows it (and the choice is remembered).
+      { id: 'email', header: text.email, value: (e) => e.email, hidden: true },
       {
         id: 'department',
         header: text.department,

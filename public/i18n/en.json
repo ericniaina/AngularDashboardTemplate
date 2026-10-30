@@ -75,7 +75,9 @@
         "on": "On",
         "before": "Before",
         "after": "After"
-      }
+      },
+      "columns": "Columns",
+      "showColumns": "Show columns"
     },
     "date": {
       "placeholder": "mm/dd/yyyy",

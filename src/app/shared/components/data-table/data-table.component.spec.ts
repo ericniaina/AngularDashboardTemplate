@@ -29,6 +29,8 @@ interface Item {
       [pageSizes]="[2]"
       [selectable]="true"
       [striped]="striped()"
+      [columnPicker]="true"
+      [columnsStorageKey]="storageKey()"
       [(selected)]="selected"
       (rowActivate)="activated.set($event)"
     />
@@ -47,6 +49,7 @@ class HostComponent {
   readonly rowId = (item: Item) => item.id;
   readonly selected = signal<readonly string[]>([]);
   readonly striped = signal(false);
+  readonly storageKey = signal<string | null>(null);
   readonly activated = signal<Item | null>(null);
 }
 
@@ -127,6 +130,65 @@ describe('DataTableComponent', () => {
       expect(tr.classList).toContain('border-b');
     }
     expect(el().querySelector('tr[cdk-footer-row]')!.classList).not.toContain('even:bg-muted/40');
+  });
+
+  describe('column picker', () => {
+    const headers = () =>
+      [...el().querySelectorAll('th[aria-sort] button span')].map((s) => s.textContent!.trim());
+    const menuItems = () => [
+      ...document.querySelectorAll<HTMLElement>('[data-slot="dropdown-menu-checkbox-item"]'),
+    ];
+    /**
+     * Clicks the "Columns" menu item for `header`, opening the menu first if needed (it renders in
+     * an overlay and stays open after a click).
+     */
+    const toggleColumn = async (header: string) => {
+      if (menuItems().length === 0) {
+        const trigger = [...el().querySelectorAll('button')].find((b) =>
+          b.textContent!.includes('common.table.columns'),
+        )!;
+        trigger.click();
+        await fixture.whenStable();
+      }
+      const item = menuItems().find((i) => i.textContent!.trim() === header)!;
+      item.click();
+      await fixture.whenStable();
+    };
+
+    afterEach(() => localStorage.clear());
+
+    it("hides a column and clears its filter, so rows aren't filtered by what can't be seen", async () => {
+      const nameFilter = el().querySelectorAll('input[type="search"]')[1] as HTMLInputElement;
+      nameFilter.value = 'cherry';
+      nameFilter.dispatchEvent(new Event('input'));
+      await fixture.whenStable();
+      expect(el().querySelectorAll('tr[cdk-row]').length).toBe(1);
+
+      await toggleColumn('Name');
+      expect(headers()).toEqual(['Size']);
+      expect(el().querySelectorAll('tr[cdk-row]').length).toBe(2); // all 3 rows, page size 2
+    });
+
+    it('remembers the choice per table only when a storage key is given', async () => {
+      await toggleColumn('Size');
+      expect(headers()).toEqual(['Name']);
+      expect(localStorage.length).toBe(0);
+
+      // A new key starts from what is stored under it (nothing yet: the column defaults).
+      host.storageKey.set('items');
+      await fixture.whenStable();
+      expect(headers()).toEqual(['Name', 'Size']);
+      await toggleColumn('Size');
+      expect(localStorage.getItem('app.table.items.hiddenColumns')).toBe('["size"]');
+
+      const second = TestBed.createComponent(HostComponent);
+      second.componentInstance.storageKey.set('items');
+      await second.whenStable();
+      const secondHeaders = [
+        ...(second.nativeElement as HTMLElement).querySelectorAll('th[aria-sort] button span'),
+      ].map((s) => s.textContent!.trim());
+      expect(secondHeaders).toEqual(['Name']);
+    });
   });
 
   it('emits rowActivate on double-click', async () => {

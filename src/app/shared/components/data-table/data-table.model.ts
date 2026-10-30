@@ -49,6 +49,10 @@ export interface DataTableColumn<T> {
   align?: 'start' | 'end';
   /** Extra Tailwind classes for the column's cells (e.g. a width: `w-24`). */
   cellClass?: string;
+  /** Default `true`: the "Columns" menu (`columnPicker`) can hide it. */
+  hideable?: boolean;
+  /** Hidden until the user shows it from the "Columns" menu. Default `false`. */
+  hidden?: boolean;
 }
 
 export interface SortState {

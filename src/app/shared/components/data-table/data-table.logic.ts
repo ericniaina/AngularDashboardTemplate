@@ -74,6 +74,29 @@ export function matchesDate(value: CellValue, filter: DateFilterValue): boolean 
   }
 }
 
+/**
+ * The columns left once `hiddenIds` are hidden. Non-hideable columns always stay, unknown ids are
+ * ignored, and hiding everything (e.g. a stale stored choice) shows everything.
+ */
+export function visibleColumns<T>(
+  columns: readonly DataTableColumn<T>[],
+  hiddenIds: readonly string[],
+): DataTableColumn<T>[] {
+  const visible = columns.filter((c) => c.hideable === false || !hiddenIds.includes(c.id));
+  return visible.length > 0 ? visible : [...columns];
+}
+
+/** A stored column choice (JSON array of column ids); `null` when absent or not that shape. */
+export function parseHiddenColumns(raw: string | null): string[] | null {
+  if (!raw) return null;
+  try {
+    const value: unknown = JSON.parse(raw);
+    return Array.isArray(value) && value.every((id) => typeof id === 'string') ? value : null;
+  } catch {
+    return null;
+  }
+}
+
 /** Nulls last; numbers numerically; strings with the locale's collation (numeric-aware). */
 export function compareValues(a: CellValue, b: CellValue, collator: Intl.Collator): number {
   const aEmpty = a === null || a === undefined || a === '';
