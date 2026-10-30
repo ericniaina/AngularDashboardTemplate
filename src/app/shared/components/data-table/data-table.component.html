@@ -217,6 +217,7 @@
       cdk-row
       *cdkRowDef="let row; columns: displayedColumns()"
       hlmTr
+      [class]="striped() ? 'even:bg-muted/40' : ''"
       [attr.data-state]="selectable() && isSelected(row) ? 'selected' : null"
       (dblclick)="rowActivate.emit(row)"
     ></tr>

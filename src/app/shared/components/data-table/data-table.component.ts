@@ -117,6 +117,8 @@ export class DataTableComponent<T> {
   /** Checkbox selection; bind `[(selected)]` to get the selected row ids. */
   readonly selectable = input(false);
   readonly selected = model<readonly string[]>([]);
+  /** Shades every other body row; hover and selection still take precedence. */
+  readonly striped = input(false);
   /** Footer row: column id → text (e.g. totals). */
   readonly footer = input<Record<string, string> | null>(null);
 

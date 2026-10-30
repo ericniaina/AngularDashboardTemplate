@@ -28,6 +28,7 @@ interface Item {
       [rowId]="rowId"
       [pageSizes]="[2]"
       [selectable]="true"
+      [striped]="striped()"
       [(selected)]="selected"
       (rowActivate)="activated.set($event)"
     />
@@ -45,6 +46,7 @@ class HostComponent {
   ];
   readonly rowId = (item: Item) => item.id;
   readonly selected = signal<readonly string[]>([]);
+  readonly striped = signal(false);
   readonly activated = signal<Item | null>(null);
 }
 
@@ -112,6 +114,19 @@ describe('DataTableComponent', () => {
     host.rows.update((rows) => rows!.map((r) => ({ ...r })));
     await fixture.whenStable();
     expect(el().querySelector('tr[cdk-row]')!.getAttribute('data-state')).toBe('selected');
+  });
+
+  it('stripes body rows only when asked, keeping the row styling', async () => {
+    const rows = () => [...el().querySelectorAll('tr[cdk-row]')];
+    expect(rows().some((tr) => tr.classList.contains('even:bg-muted/40'))).toBe(false);
+
+    host.striped.set(true);
+    await fixture.whenStable();
+    for (const tr of rows()) {
+      expect(tr.classList).toContain('even:bg-muted/40');
+      expect(tr.classList).toContain('border-b');
+    }
+    expect(el().querySelector('tr[cdk-footer-row]')!.classList).not.toContain('even:bg-muted/40');
   });
 
   it('emits rowActivate on double-click', async () => {

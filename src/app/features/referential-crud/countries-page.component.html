@@ -19,6 +19,7 @@
   [label]="'countries.title' | transloco"
   [rows]="store.loaded() ? store.countries() : null"
   [columns]="columns()"
+  [striped]="true"
   [rowId]="rowId"
   [actions]="rowActions()"
   [externalFilter]="externalFilter()"
